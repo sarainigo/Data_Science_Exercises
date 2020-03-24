@@ -7,4 +7,4 @@ The exercises are:
 - OptionPricesGeneration
 - SamplingMethods_OptionPricesGeneration
 
-The file 
+The file MonteCarloNotesMfiles contains functions provided in advance of taking the course.
