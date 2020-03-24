@@ -1,6 +1,6 @@
 # Monte Carlo Methods in Finance
 Some interesting exercices of the course Monte Carlo Methods in Finance.
-The exercises are:
+This exercises are:
 - RandomVariableExpectation
 - IntegrationExpectation
 - GenerateRandomVariables
