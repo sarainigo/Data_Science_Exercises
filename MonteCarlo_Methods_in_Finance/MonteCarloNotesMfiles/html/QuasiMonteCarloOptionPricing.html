@@ -1,0 +1,292 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Pricing Options Using Quasi-Monte Carlo Sampling</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="QuasiMonteCarloOptionPricing.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Pricing Options Using Quasi-Monte Carlo Sampling</h1><!--introduction--><p>Most of our Monte Carlo methods have relied on independent and identically distributed (IID) samples.  But we can often compute the answer faster by using <i>low discrepancy</i> or <i>highly stratified</i> samples. This demo shows the advantages for some of the option pricing problems that have been studied using IID sampling.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Different sampling strategies</a></li><li><a href="#3">Shifted lattice node sets</a></li><li><a href="#5">Scrambled Sobol' points</a></li><li><a href="#6">Pricing the Asian Arithmetic Mean Call Option</a></li><li><a href="#12">Sobol' Sampling with Control Variates</a></li></ul></div><h2>Different sampling strategies<a name="1"></a></h2><p>We consider the problem of sampling uniformly on the unit cube, \([0,1]^d\). For illustration we choose \(d = 2\).  Here are \(n=256\) IID samples</p><pre class="codeinput">gail.InitializeWorkspaceDisplay <span class="comment">%initialize the workspace and the display parameters</span>
+d = 2; <span class="comment">%dimension</span>
+n = 256; <span class="comment">%number of samples</span>
+xIID = rand(n,d); <span class="comment">%uniform (quasi-)random numbers</span>
+plot(xIID(:,1),xIID(:,2),<span class="string">'.'</span>) <span class="comment">%plot the points</span>
+xlabel(<span class="string">'$x_1$'</span>) <span class="comment">%and label</span>
+ylabel(<span class="string">'$x_2$'</span>) <span class="comment">%the axes</span>
+title(<span class="string">'IID points'</span>)
+axis <span class="string">square</span> <span class="comment">%make the aspect ratio equal to one</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeWorkspaceDisplay".
+Error in QuasiMonteCarloOptionPricing (line 12)
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters</pre><p>Since the points are IID, there are gaps and clusters.  The points do not know about the locations of each other.</p><h2>Shifted lattice node sets<a name="3"></a></h2><p>One set of more <i>evenly</i> distributed points are node sets of <i>integration lattices</i>.  They look like a tilted grid. Here is an example with a shift modulo one.</p><pre class="codeinput">figure
+xLattice = mod(bsxfun(@plus,gail.lattice_gen(1,n,d),rand(1,d)),1); <span class="comment">%the first n rank-1 lattice node sets, shifted</span>
+plot(xLattice(:,1),xLattice(:,2),<span class="string">'.'</span>) <span class="comment">%plot the points</span>
+xlabel(<span class="string">'$x_1$'</span>) <span class="comment">%and label</span>
+ylabel(<span class="string">'$x_2$'</span>) <span class="comment">%the axes</span>
+title(<span class="string">'Rank-1 lattice node set'</span>)
+axis <span class="string">square</span> <span class="comment">%make the aspect ratio equal to one</span>
+</pre><p>Now the gaps are smaller and the clusters are less dense.  The points <i>do</i> know about the locations of each other, so they are <i>dependent</i>.</p><h2>Scrambled Sobol' points<a name="5"></a></h2><p>Another way to sample more <i>evenly</i> is to use Sobol' points.  Here is a plot of the same number of <i>scrambled and shifted</i> Sobol' points. They are also random, but not IID.</p><pre class="codeinput">figure
+sob = scramble(sobolset(d),<span class="string">'MatousekAffineOwen'</span>); <span class="comment">%create a scrambled Sobol object</span>
+xSobol = net(sob,n); <span class="comment">%the first n points of a Sobol' sequence</span>
+plot(xSobol(:,1),xSobol(:,2),<span class="string">'.'</span>) <span class="comment">%plot the points</span>
+xlabel(<span class="string">'$x_1$'</span>) <span class="comment">%and label</span>
+ylabel(<span class="string">'$x_2$'</span>) <span class="comment">%the axes</span>
+title(<span class="string">'Sobol'' points'</span>)
+axis <span class="string">square</span> <span class="comment">%make the aspect ratio equal to one</span>
+</pre><h2>Pricing the Asian Arithmetic Mean Call Option<a name="6"></a></h2><p>Now we set up the parameters for option pricing.  We consider first the Asian Geometric Mean Call with weeky monitoring for three months</p><pre class="codeinput">inp.timeDim.timeVector = 1/52:1/52:1/4; <span class="comment">%weekly monitoring for three months</span>
+inp.assetParam.initPrice = 100; <span class="comment">%initial stock price</span>
+inp.assetParam.interest = 0.02; <span class="comment">%risk-free interest rate</span>
+inp.assetParam.volatility = 0.5; <span class="comment">%volatility</span>
+inp.payoffParam.strike = 100; <span class="comment">%strike price</span>
+inp.payoffParam.optType = {<span class="string">'amean'</span>}; <span class="comment">%looking at an arithmetic mean option</span>
+inp.payoffParam.putCallType = {<span class="string">'call'</span>}; <span class="comment">%looking at a put option</span>
+inp.priceParam.absTol = 0.005; <span class="comment">%absolute tolerance of a one cent</span>
+inp.priceParam.relTol = 0; <span class="comment">%zero relative tolerance</span>
+</pre><p>The first method that we try is simple IID sampling</p><pre class="codeinput">AMeanCallIID = optPrice(inp) <span class="comment">%construct an optPrice object</span>
+[AMeanCallIIDPrice,AoutIID] = genOptPrice(AMeanCallIID);
+fprintf([<span class="string">'The price of the Asian geometric mean call option using IID '</span> <span class="keyword">...</span>
+   <span class="string">'sampling is \n   $%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds\n'</span>], <span class="keyword">...</span>
+   AMeanCallIIDPrice,AMeanCallIID.priceParam.absTol,AoutIID.nPaths,AoutIID.time)
+</pre><p>Note that in this case we know the correct answer, and our IID Monte Carlo gives the correct answer.</p><p>Next we try Sobol' sampling and see a big speed up:</p><pre class="codeinput">AMeanCallSobol = optPrice(AMeanCallIID); <span class="comment">%make a copy of the IID optPrice object</span>
+AMeanCallSobol.priceParam.cubMethod = <span class="string">'Sobol'</span> <span class="comment">%change to Sobol sampling</span>
+[AMeanCallSobolPrice,AoutSobol] = genOptPrice(AMeanCallSobol);
+fprintf([<span class="string">'The price of the Asian geometric mean call option using Sobol'' '</span> <span class="keyword">...</span>
+   <span class="string">'sampling is\n   $%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds,\n'</span> <span class="keyword">...</span>
+   <span class="string">'which is only %1.5f the time required by IID sampling\n'</span>], <span class="keyword">...</span>
+   AMeanCallSobolPrice,AMeanCallSobol.priceParam.absTol,AoutSobol.nPaths, <span class="keyword">...</span>
+   AoutSobol.time,AoutSobol.time/AoutIID.time)
+</pre><p>Again the answer provided is correct.  For a greater speed up, we may use the PCA construction, which reduces the effective dimension of the problem.</p><pre class="codeinput">AMeanCallSobol.bmParam.assembleType = <span class="string">'PCA'</span>; <span class="comment">%change to a PCA construction</span>
+[AMeanCallSobolPrice,AoutSobol] = genOptPrice(AMeanCallSobol);
+fprintf([<span class="string">'The price of the Asian geometric mean call option using Sobol'' '</span> <span class="keyword">...</span>
+   <span class="string">'sampling and PCA is\n   $%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds,\n'</span> <span class="keyword">...</span>
+   <span class="string">'which is only %1.5f the time required by IID sampling\n'</span>], <span class="keyword">...</span>
+   AMeanCallSobolPrice,AMeanCallSobol.priceParam.absTol,AoutSobol.nPaths, <span class="keyword">...</span>
+   AoutSobol.time,AoutSobol.time/AoutIID.time)
+</pre><p>Another option is to use lattice sampling.</p><pre class="codeinput">AMeanCallLattice = optPrice(AMeanCallSobol); <span class="comment">%make a copy of the IID optPrice object</span>
+AMeanCallLattice.priceParam.cubMethod = <span class="string">'lattice'</span> <span class="comment">%change to lattice sampling</span>
+[AMeanCallLatticePrice,AoutLattice] = genOptPrice(AMeanCallLattice);
+fprintf([<span class="string">'The price of the Asian geometric mean call option using lattice '</span> <span class="keyword">...</span>
+   <span class="string">'sampling is\n   $%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds,\n'</span> <span class="keyword">...</span>
+   <span class="string">'which is only %1.5f the time required by IID sampling\n'</span>], <span class="keyword">...</span>
+   AMeanCallLatticePrice,AMeanCallLattice.priceParam.absTol,AoutLattice.nPaths, <span class="keyword">...</span>
+   AoutLattice.time,AoutLattice.time/AoutIID.time)
+</pre><p>Note that the time is also less than for IID, but similar to that for Sobol' sampling.</p><h2>Sobol' Sampling with Control Variates<a name="12"></a></h2><p>We can use control variates with Sobol' and lattice sampling, but it is a bit different than for IID sampling.  Here is an example.</p><pre class="codeinput">AMeanCallSobolCV = optPrice(AMeanCallSobol); <span class="comment">%make a copy of the object</span>
+AMeanCallSobolCV.payoffParam = struct( <span class="keyword">...</span>
+   <span class="string">'optType'</span>,{{<span class="string">'amean'</span>,<span class="string">'gmean'</span>}},<span class="keyword">...</span><span class="comment">  %Add two payoffs</span>
+   <span class="string">'putCallType'</span>,{{<span class="string">'call'</span>,<span class="string">'call'</span>}});  <span class="comment">%both calls</span>
+AMeanCallSobolCV.priceParam.cubMethod = <span class="string">'SobolCV'</span>; <span class="comment">%change method to use control variates</span>
+[AMeanCallSobolCVPrice,AoutSobolCV] = genOptPrice(AMeanCallSobolCV);
+fprintf([<span class="string">'The price of the Asian geometric mean call option using Sobol'' '</span> <span class="keyword">...</span>
+   <span class="string">'sampling with PCA and control variates is\n'</span> <span class="keyword">...</span>
+   <span class="string">'$%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds,\n'</span> <span class="keyword">...</span>
+   <span class="string">'which is only %1.5f the time required by IID sampling\n'</span>], <span class="keyword">...</span>
+   AMeanCallSobolCVPrice,AMeanCallSobolCV.priceParam.absTol,AoutSobolCV.nPaths, <span class="keyword">...</span>
+   AoutSobolCV.time,AoutSobolCV.time/AoutIID.time)
+</pre><p>The use of control variates reduces the time to compute the answer even further compared to Sobol' sampling without control variates.</p><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Pricing Options Using Quasi-Monte Carlo Sampling
+% Most of our Monte Carlo methods have relied on independent and
+% identically distributed (IID) samples.  But we can often compute the
+% answer faster by using _low discrepancy_ or _highly stratified_ samples.
+% This demo shows the advantages for some of the option pricing problems
+% that have been studied using IID sampling.
+
+%% Different sampling strategies
+% We consider the problem of sampling uniformly on the unit cube, \([0,1]^d\). 
+% For illustration we choose \(d = 2\).  Here are \(n=256\) IID samples
+
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters
+d = 2; %dimension
+n = 256; %number of samples
+xIID = rand(n,d); %uniform (quasi-)random numbers
+plot(xIID(:,1),xIID(:,2),'.') %plot the points 
+xlabel('$x_1$') %and label
+ylabel('$x_2$') %the axes
+title('IID points')
+axis square %make the aspect ratio equal to one
+
+%%
+% Since the points are IID, there are gaps and clusters.  The points do not
+% know about the locations of each other.
+
+%% Shifted lattice node sets
+% One set of more _evenly_ distributed points are node sets of _integration
+% lattices_.  They look like a tilted grid. Here is an example with a shift
+% modulo one.
+
+figure
+xLattice = mod(bsxfun(@plus,gail.lattice_gen(1,n,d),rand(1,d)),1); %the first n rank-1 lattice node sets, shifted
+plot(xLattice(:,1),xLattice(:,2),'.') %plot the points 
+xlabel('$x_1$') %and label
+ylabel('$x_2$') %the axes
+title('Rank-1 lattice node set')
+axis square %make the aspect ratio equal to one
+
+%%
+% Now the gaps are smaller and the clusters are less dense.  The points
+% _do_ know about the locations of each other, so they are _dependent_.
+
+%% Scrambled Sobol' points
+% Another way to sample more _evenly_ is to use Sobol' points.  Here is a
+% plot of the same number of _scrambled and shifted_ Sobol' points. They
+% are also random, but not IID.
+
+figure
+sob = scramble(sobolset(d),'MatousekAffineOwen'); %create a scrambled Sobol object
+xSobol = net(sob,n); %the first n points of a Sobol' sequence
+plot(xSobol(:,1),xSobol(:,2),'.') %plot the points 
+xlabel('$x_1$') %and label
+ylabel('$x_2$') %the axes
+title('Sobol'' points')
+axis square %make the aspect ratio equal to one
+
+%% Pricing the Asian Arithmetic Mean Call Option
+% Now we set up the parameters for option pricing.  We consider first the
+% Asian Geometric Mean Call with weeky monitoring for three months
+
+inp.timeDim.timeVector = 1/52:1/52:1/4; %weekly monitoring for three months
+inp.assetParam.initPrice = 100; %initial stock price
+inp.assetParam.interest = 0.02; %risk-free interest rate
+inp.assetParam.volatility = 0.5; %volatility
+inp.payoffParam.strike = 100; %strike price
+inp.payoffParam.optType = {'amean'}; %looking at an arithmetic mean option
+inp.payoffParam.putCallType = {'call'}; %looking at a put option
+inp.priceParam.absTol = 0.005; %absolute tolerance of a one cent
+inp.priceParam.relTol = 0; %zero relative tolerance
+
+%% 
+% The first method that we try is simple IID sampling
+
+AMeanCallIID = optPrice(inp) %construct an optPrice object 
+[AMeanCallIIDPrice,AoutIID] = genOptPrice(AMeanCallIID);
+fprintf(['The price of the Asian geometric mean call option using IID ' ...
+   'sampling is \n   $%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds\n'], ...
+   AMeanCallIIDPrice,AMeanCallIID.priceParam.absTol,AoutIID.nPaths,AoutIID.time)
+
+%%
+% Note that in this case we know the correct answer, and our IID Monte
+% Carlo gives the correct answer.
+% 
+% Next we try Sobol' sampling and see a big speed up:
+
+AMeanCallSobol = optPrice(AMeanCallIID); %make a copy of the IID optPrice object
+AMeanCallSobol.priceParam.cubMethod = 'Sobol' %change to Sobol sampling
+[AMeanCallSobolPrice,AoutSobol] = genOptPrice(AMeanCallSobol);
+fprintf(['The price of the Asian geometric mean call option using Sobol'' ' ...
+   'sampling is\n   $%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds,\n' ...
+   'which is only %1.5f the time required by IID sampling\n'], ...
+   AMeanCallSobolPrice,AMeanCallSobol.priceParam.absTol,AoutSobol.nPaths, ...
+   AoutSobol.time,AoutSobol.time/AoutIID.time)
+
+%%
+% Again the answer provided is correct.  For a greater speed up, we may use
+% the PCA construction, which reduces the effective dimension of the
+% problem.
+
+AMeanCallSobol.bmParam.assembleType = 'PCA'; %change to a PCA construction
+[AMeanCallSobolPrice,AoutSobol] = genOptPrice(AMeanCallSobol);
+fprintf(['The price of the Asian geometric mean call option using Sobol'' ' ...
+   'sampling and PCA is\n   $%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds,\n' ...
+   'which is only %1.5f the time required by IID sampling\n'], ...
+   AMeanCallSobolPrice,AMeanCallSobol.priceParam.absTol,AoutSobol.nPaths, ...
+   AoutSobol.time,AoutSobol.time/AoutIID.time)
+
+%% 
+% Another option is to use lattice sampling.
+
+AMeanCallLattice = optPrice(AMeanCallSobol); %make a copy of the IID optPrice object
+AMeanCallLattice.priceParam.cubMethod = 'lattice' %change to lattice sampling
+[AMeanCallLatticePrice,AoutLattice] = genOptPrice(AMeanCallLattice);
+fprintf(['The price of the Asian geometric mean call option using lattice ' ...
+   'sampling is\n   $%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds,\n' ...
+   'which is only %1.5f the time required by IID sampling\n'], ...
+   AMeanCallLatticePrice,AMeanCallLattice.priceParam.absTol,AoutLattice.nPaths, ...
+   AoutLattice.time,AoutLattice.time/AoutIID.time)
+
+%% 
+% Note that the time is also less than for IID, but similar to that for
+% Sobol' sampling.
+
+%% Sobol' Sampling with Control Variates
+% We can use control variates with Sobol' and lattice sampling, but it is a
+% bit different than for IID sampling.  Here is an example.
+AMeanCallSobolCV = optPrice(AMeanCallSobol); %make a copy of the object
+AMeanCallSobolCV.payoffParam = struct( ...
+   'optType',{{'amean','gmean'}},...  %Add two payoffs
+   'putCallType',{{'call','call'}});  %both calls
+AMeanCallSobolCV.priceParam.cubMethod = 'SobolCV'; %change method to use control variates
+[AMeanCallSobolCVPrice,AoutSobolCV] = genOptPrice(AMeanCallSobolCV);
+fprintf(['The price of the Asian geometric mean call option using Sobol'' ' ...
+   'sampling with PCA and control variates is\n' ...
+   '$%3.3f +/- $%2.3f and this took %10.0f paths and %3.6f seconds,\n' ...
+   'which is only %1.5f the time required by IID sampling\n'], ...
+   AMeanCallSobolCVPrice,AMeanCallSobolCV.priceParam.absTol,AoutSobolCV.nPaths, ...
+   AoutSobolCV.time,AoutSobolCV.time/AoutIID.time)
+
+%%
+% The use of control variates reduces the time to compute the answer even
+% further compared to Sobol' sampling without control variates.
+%
+% _Author: Fred J. Hickernell_
+
+##### SOURCE END #####
+--></body></html>

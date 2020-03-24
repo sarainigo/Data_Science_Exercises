@@ -1,0 +1,441 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Generating Random Variables and Vectors</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="GenerateRandomVariables.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Generating Random Variables and Vectors</h1><!--introduction--><p>MATLAB has basic random number generators</p><div><ul><li><tt>rand</tt> for generating \(\mathcal{U}[0,1]\) random variables, and</li><li><tt>randn</tt> for generating \(\mathcal{N}(0,1)\) random variables.</li></ul></div><p>In this MATLAB script we want to show how to generate other kinds of random variables</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">\(\mathcal{U}[\boldsymbol{a},\boldsymbol{b}]\) random vectors</a></li><li><a href="#2">\(\mathcal{N}(\boldsymbol{m},\mathsf{\Sigma})\) random vectors</a></li><li><a href="#6">Generating Exp(\(\lambda\)) Random Numbers by the Inverse Distribution Transformation</a></li><li><a href="#7">Generating Discrete Random Numbers by the Inverse Distribution Transformation</a></li><li><a href="#12">Generating Gaussian Random Variates</a></li><li><a href="#13">Generating Gaussian Random Variates by the Inverse CDF Transform</a></li><li><a href="#15">Generating Gaussian Random Variates by the Acceptance-Rejection Method</a></li><li><a href="#17">Generating Gaussian Random Variates by the Box-Muller Method</a></li></ul></div><h2>\(\mathcal{U}[\boldsymbol{a},\boldsymbol{b}]\) random vectors<a name="1"></a></h2><p>The command <tt>rand(n,d)</tt> generates \(n\) IID uniform random \(d\)-vectors with distribution \(\mathcal{U}[0,1]^d\).  If we need uniform random vectors, \(\boldsymbol{Z}\), over an arbitrary, finite \(d\)-dimensional box \([\boldsymbol{a},\boldsymbol{b}]\), then we can make an affine transformation:</p><p>\[ Z_j = a_j + (b_j - a_j) X_j, \quad j=1, \ldots, d, \qquad \boldsymbol{X} \sim \mathcal{U}[0,1]^d. \]</p><pre class="codeinput">gail.InitializeWorkspaceDisplay <span class="comment">%initialize the workspace and the display parameters</span>
+unif = @(n,ab) bsxfun(@plus,ab(1,:), bsxfun(@times, diff(ab,1,1),rand(n,size(ab,2))));
+   <span class="comment">%function to generate n uniform random vectors on the box defined by ab</span>
+figure
+box = [-3 5; 4 6]; <span class="comment">%some box</span>
+unifpts = unif(30,[-3 5; 4 6]); <span class="comment">%generate some random vectors</span>
+plot(unifpts(:,1),unifpts(:,2),<span class="string">'.'</span>) <span class="comment">%plot the random vectors</span>
+axis([box(1,1) box(2,1) box(1,2) box(2,2)]) <span class="comment">%set axes to match the box</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeWorkspaceDisplay".
+Error in GenerateRandomVariables (line 22)
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters</pre><h2>\(\mathcal{N}(\boldsymbol{m},\mathsf{\Sigma})\) random vectors<a name="2"></a></h2><p>The command <tt>randn(n,d)</tt> generates \(n\) IID Gaussian (normal) random \(d\)-vectors with distribution \(\mathcal{N}(\boldsymbol{0},\mathsf{I})\).  If we need Gaussian random vectors with an arbitrary mean and covariance matrix, i.e., \(\boldsymbol{Z} \sim \mathcal{N}(\boldsymbol{m},\mathsf{\Sigma})\), then we can make an affine transformation.</p><p>If \(\mathsf{A}\) is an arbitrary \(d \times d\) matrix, \(\boldsymbol{m}\) is an arbitrary \(d\)-vector, and \(\boldsymbol{X} \sim \mathcal{N}(\boldsymbol{0},\mathsf{I})\), then</p><p>\[ \boldsymbol{Z} = \boldsymbol{m} +  \mathsf{A} \boldsymbol{X} \]</p><p>is automatically Gaussian with mean</p><p>\[ \mathbb{E}(\boldsymbol{Z}) = \mathbb{E}(\boldsymbol{m}) +  \mathsf{A} \mathbb{E}(\boldsymbol{X}) = \boldsymbol{m} \]</p><p>and variance</p><p>\[ \text{var}(\boldsymbol{Z}) = \mathbb{E}\bigl[(\boldsymbol{Z} - \boldsymbol{m})(\boldsymbol{Z} - \boldsymbol{m})^T \bigr] = \mathbb{E}\bigl[\mathsf{A} \boldsymbol{X}\boldsymbol{X}^T \mathsf{A}^T \bigr] = \mathsf{A} \mathbb{E} \bigl[\boldsymbol{X} \boldsymbol{X}^T \bigr] \mathsf{A}^T = \mathsf{A} \mathsf{A}^T \]</p><p>So if we can choose \(\mathsf{A}\) such that \( \mathsf{\Sigma} = \mathsf{A} \mathsf{A}^T\), we have a way to generate Gaussian random vectors with arbitrary mean and covariance matrix.  One way to do that is using the Cholesky decomposition. Note that in our notation above our random vectors are column vectors, but in our MATLAB notation below they are row vectors.</p><pre class="codeinput">Sigma = [2 1; 1 1] <span class="comment">%a symmetric positive-definite matrix</span>
+eig(Sigma) <span class="comment">%note that the eigenvalue are all positive</span>
+Gaussian = @(n,m,B) bsxfun(@plus,m,randn(n,size(m,2))*B);
+   <span class="comment">%function to generate n Gaussian random row vectors, where B corresponds</span>
+   <span class="comment">%to A'</span>
+B = chol(Sigma) <span class="comment">%uses the Cholesky decomposition to create an upper triangluar matrix such that B'B = Sigma</span>
+   <span class="comment">%note that this B corresponds to our A' above</span>
+shouldBeSigma = B'*B <span class="comment">%checking that this is Sigma</span>
+m = [-1 3];
+figure
+Gaussianpts = Gaussian(1000,m,B); <span class="comment">%generate some random vectors</span>
+plot(Gaussianpts(:,1),Gaussianpts(:,2),<span class="string">'.'</span>) <span class="comment">%plot the random vectors</span>
+axis([-6 4 -1 7])
+</pre><p>We may check that the sample quantities are close to the population quantities:</p><pre class="codeinput">shouldBeAlmostM = mean(Gaussianpts) <span class="comment">%should be close to m</span>
+shouldBeAlmostSigma = cov(Gaussianpts) <span class="comment">%should be close to Sigma</span>
+</pre><p>Given a covariance matrix \(\mathsf{\Sigma}\) there are many matrices \(\mathsf{A}\) satisfying \(\mathsf{\Sigma} = \mathsf{A} \mathsf{A}^T\).  For example, if \(\mathsf{U}\) is any unitary matrix, i.e., any matrix  satisfying \(\mathsf{U}^T \mathsf{U} = \mathsf{I}\), then  \(\mathsf{\Sigma} = \mathsf{C} \mathsf{C}^T\) for \(\mathsf{C} =  \mathsf{A}\mathsf{U}^T\).  Another way to find a matrix \(\mathsf{A}\)  satisfying \(\mathsf{\Sigma} = \mathsf{A} \mathsf{A}^T\) is to use the  singular value decomposition:  \(\mathsf{\Sigma} =  \mathsf{U}\mathsf{\Gamma}\mathsf{V}'\), where \(\mathsf{U}\) and  \(\mathsf{V}\) are unitary and \(\mathsf{\Gamma}\) is diagonal with  non-negative entries.  Since \(\mathsf{\Sigma}\) is symmetric,  \(\mathsf{U} = \mathsf{V}\), so one may choose</p><p>\[ \mathsf{A} = \mathsf{U} \mathsf{\Gamma}^{1/2}. \]</p><pre class="codeinput">[U,Gamma] = svd(Sigma,<span class="string">'econ'</span>); <span class="comment">%computes the SVD decomposition</span>
+B = bsxfun(@times,sqrt(diag(Gamma)),U') <span class="comment">% to create an upper triangluar matrix such that B'B = Sigma</span>
+   <span class="comment">%note that this B corresponds to our A' above</span>
+shouldBeSigma = B'*B <span class="comment">%checking that this is Sigma</span>
+figure
+Gaussianpts = Gaussian(1000,m,B); <span class="comment">%generate some random vectors</span>
+plot(Gaussianpts(:,1),Gaussianpts(:,2),<span class="string">'.'</span>) <span class="comment">%plot the random vectors</span>
+axis([-6 4 -1 7])
+</pre><p>Again we may check that the sample quantities are close to the population quantities:</p><pre class="codeinput">shouldBeAlmostM = mean(Gaussianpts) <span class="comment">%should be close to m</span>
+shouldBeAlmostSigma = cov(Gaussianpts) <span class="comment">%should be close to Sigma</span>
+</pre><h2>Generating Exp(\(\lambda\)) Random Numbers by the Inverse Distribution Transformation<a name="6"></a></h2><p>For random vectors that are not distributed uniformly or Gaussian, we may sometimes use the inverse cumulative distribution function.  To genearate an exponentially distributed random variable, \(Y \sim \) Exp(\(\lambda\)), one uses the transformation</p><p>\[ Y = \frac{-\log(X)}{\lambda}, \qquad X \sim [0,1]. \]</p><p>Suppose that the taxis arrive at a rate of once per ten minutes, \(\lambda = 0.1\) min\({}^{-1}\).  Then the average time required to wait for two taxis to take your group of eight friends is \(20\) minutes, which can be computed analytically and by Monte Carlo:</p><pre class="codeinput">twotaxiwait = @(n) -10*sum(log(rand(n,2)),2);
+avgwait = meanMC_g(twotaxiwait,0.01,0)
+</pre><h2>Generating Discrete Random Numbers by the Inverse Distribution Transformation<a name="7"></a></h2><p>Discrete random variables have their probablity mass functions, \(\varrho\), and cumulative distribution functions, \(F\), given by tables, e.g.,</p><p>\[ \begin{array}{r|cccc} y &amp; 0 &amp; 1 &amp; 2 &amp; 3 \\ \varrho(y) = \mathbb{P}(Y=y) &amp; 0.2 &amp; 0.4 &amp; 0.3 &amp; 0.1 \\ F(y) = \mathbb{P}(Y \le y) &amp; 0.2 &amp; 0.6 &amp; 0.9 &amp; 1 \\ \end{array} \]</p><pre class="codeinput">yvals = 0:3 <span class="comment">%ordered possible values of the random variable Y</span>
+PDFvals = [0.2 0.4 0.3 0.1] <span class="comment">%corresponding values of the PDF</span>
+CDFvals = cumsum(PDFvals) <span class="comment">%corresponding values of the CDF</span>
+</pre><p>Here is a plot of \(F\) and \(F^{-1}\)</p><pre class="codeinput">figure
+plot(yvals, CDFvals, <span class="string">'.'</span>, <span class="keyword">...</span>
+   [-1 yvals; yvals 4],[0 CDFvals; 0 CDFvals],<span class="string">'-'</span>, <span class="keyword">...</span>
+   <span class="string">'color'</span>,MATLABBlue)
+hold <span class="string">on</span>
+plot(yvals, [0 CDFvals(1:3)], <span class="string">'.'</span>, <span class="keyword">...</span>
+   [yvals; yvals],[0 CDFvals(1:3); CDFvals],<span class="string">'-'</span>, <span class="keyword">...</span>
+   <span class="string">'color'</span>,MATLABOrange)
+axis([-1 4 -0.1 1.1])
+hlab = xlabel(<span class="string">'\(y\)'</span>,<span class="string">'color'</span>,MATLABBlue); <span class="comment">%x-axis label</span>
+hlabPos = get(hlab,<span class="string">'Position'</span>); <span class="comment">%get its position</span>
+haxPos = get(gca,<span class="string">'Position'</span>); <span class="comment">%get position of the whole plot</span>
+hlab.Position = hlabPos - [0.5 0 0]; <span class="comment">%move label left</span>
+text(hlabPos(1)+0.2,hlabPos(2)-0.07,<span class="string">'\(F^{-1}(x)\)'</span>,<span class="string">'color'</span>,MATLABOrange)
+   <span class="comment">%add another x-axis label</span>
+hlab = ylabel(<span class="string">'\(F(y)\)'</span>,<span class="string">'color'</span>,MATLABBlue); <span class="comment">%y-axis label</span>
+hlabPos = get(hlab,<span class="string">'Position'</span>); <span class="comment">%get its position</span>
+hlab.Position = hlabPos - [0 0.15 0]; <span class="comment">%move label down</span>
+text(hlabPos(1)-0.15,hlabPos(2)+0.15,<span class="string">'\(x\)'</span>,<span class="string">'color'</span>,MATLABOrange, <span class="keyword">...</span>
+   <span class="string">'rotation'</span>,90); <span class="comment">%add another y-axis label</span>
+set(gca,<span class="string">'Position'</span>, haxPos); <span class="comment">%re-set plot position</span>
+print <span class="string">-depsc</span> <span class="string">discreteFFinv.eps</span> <span class="comment">%print the plot</span>
+</pre><p>We can use the <tt>griddedInterpolant</tt> to build the quantile function, \(F^{-1}\).</p><pre class="codeinput">quantileFun = griddedInterpolant(CDFvals,yvals,<span class="string">'next'</span>); <span class="comment">%next neighbor interpolation</span>
+</pre><p>This allows us to generate IID values of \(Y\).</p><pre class="codeinput">X = rand(1,8) <span class="comment">%generate IID standard uniform random numbers</span>
+Y = quantileFun(X) <span class="comment">%generate IID random numbers with the desired distribution</span>
+</pre><p>We can check the sample statistics of this random number generator and note that they are close to the correponding population values</p><pre class="codeinput">Y = quantileFun(rand(1e4,1)); <span class="comment">%generate a large number of Y values</span>
+prob0 = mean(Y == 0) <span class="comment">%sample proportion of 0 values, should be close to 0.2</span>
+prob1 = mean(Y == 1) <span class="comment">%sample proportion of 1 values, should be close to 0.4</span>
+prob2 = mean(Y == 2) <span class="comment">%sample proportion of 2 values, should be close to 0.3</span>
+prob3 = mean(Y == 3) <span class="comment">%sample proportion of 3 values, should be close to 0.1</span>
+</pre><h2>Generating Gaussian Random Variates<a name="12"></a></h2><p>The Gaussian random number generator, <tt>randn</tt>, is built on the uniform random number generator, <tt>rand</tt>, in a rather sophisticated way.  But <tt>randn</tt> is a bit   slower than <tt>rand</tt>.  E.g.,</p><pre class="codeinput">n = 1e6; <span class="comment">%number of random variables needed</span>
+tic
+X = rand(n,1); <span class="comment">%generate uniform random numbers</span>
+toc
+tic
+Z = randn(n,1); <span class="comment">%generate Gaussian random numbers</span>
+toc
+</pre><h2>Generating Gaussian Random Variates by the Inverse CDF Transform<a name="13"></a></h2><p>MATLAB has an inverse normal transform, which can be used to generate Gaussian random variables</p><pre class="codeinput">tic
+ZCDF = norminv(rand(n,1)); <span class="comment">%generate Gaussian random numbers by the inverse CDF transform</span>
+toc
+</pre><p>This method is slower than <tt>randn</tt>, but is useful when the uniform random numbers come from non-IID uniform low discrepancy points.</p><h2>Generating Gaussian Random Variates by the Acceptance-Rejection Method<a name="15"></a></h2><p>Here we explore one possible way of generating Gaussian random numbers from uniform random numbers.  If \((X_i, U_i, V_i) \overset{\text{IID}}{\sim} \mathcal{U}[0,1]^3\), and \(Y_i = \log(X_i)\), then we accept</p><p>\[ \text{sign}(V_i - 0.5)Y_i \]</p><p>as a \(\mathcal{N}(0,1)\) random number provided that \(U_i \le \exp(-(Y_i+1)^2/2)\).  Since we only accept \(\sqrt{\pi/(2 {\rm e})}\approx 0.76\) of the values, we must generate, say \(1.4 &gt; 1/0.76\) times as many \((X_i, U_i, V_i)\) as the number of Gaussian random variables that we need.</p><pre class="codeinput">tic
+XUV = rand(1.4*n,3); <span class="comment">%some uniform random numbers</span>
+Y = log(XUV(:,1)); <span class="comment">%compute Y</span>
+keep = XUV(:,2) &lt;= exp(-(Y+1).^2/2); <span class="comment">%these are the ones that we keep</span>
+ZAR = Y(keep); <span class="comment">%grab the ones that we want</span>
+ZAR = ZAR.*sign(XUV(keep,3)-0.5); <span class="comment">%apply the sign</span>
+ZAR = ZAR(1:n); <span class="comment">%keep only as many as we need</span>
+toc
+</pre><p>This method is much slower than <tt>randn</tt>, but we can use it for other distributions as well.</p><h2>Generating Gaussian Random Variates by the Box-Muller Method<a name="17"></a></h2><p>Another method for generating the two IID Gaussian random variables at a time is as follows</p><pre class="codeinput">tic
+ZBM = rand(n,2); <span class="comment">%uniform random vectors</span>
+ZBM = [sqrt(-2*log(ZBM(:,1))) (2*pi)*ZBM(:,2)];
+ZBM = [ZBM(:,1).*cos(ZBM(:,2)) ZBM(:,1).*sin(ZBM(:,2))]; <span class="comment">%Gaussian random vectors</span>
+toc
+
+tic
+Z2 = randn(n,2); <span class="comment">%generate Gaussian random numbers</span>
+toc
+</pre><p>The Box-Muller method is slower, but somewhat more competitive than acceptance-rejection.</p><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Generating Random Variables and Vectors
+% MATLAB has basic random number generators
+%
+% * |rand| for generating \(\mathcal{U}[0,1]\) random variables, and
+% * |randn| for generating \(\mathcal{N}(0,1)\) random variables.
+%
+% In this MATLAB script we want to show how to generate other kinds of
+% random variables
+
+%% \(\mathcal{U}[\boldsymbol{a},\boldsymbol{b}]\) random vectors
+% The command |rand(n,d)| generates \(n\) IID uniform random \(d\)-vectors
+% with distribution \(\mathcal{U}[0,1]^d\).  If we need uniform random
+% vectors, \(\boldsymbol{Z}\), over an arbitrary, finite \(d\)-dimensional
+% box \([\boldsymbol{a},\boldsymbol{b}]\), then we can make an affine
+% transformation:
+%
+% \[
+% Z_j = a_j + (b_j - a_j) X_j, \quad j=1, \ldots, d, \qquad \boldsymbol{X}
+% \sim \mathcal{U}[0,1]^d.
+% \]
+
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters
+unif = @(n,ab) bsxfun(@plus,ab(1,:), bsxfun(@times, diff(ab,1,1),rand(n,size(ab,2))));
+   %function to generate n uniform random vectors on the box defined by ab
+figure
+box = [-3 5; 4 6]; %some box
+unifpts = unif(30,[-3 5; 4 6]); %generate some random vectors
+plot(unifpts(:,1),unifpts(:,2),'.') %plot the random vectors
+axis([box(1,1) box(2,1) box(1,2) box(2,2)]) %set axes to match the box
+
+%% \(\mathcal{N}(\boldsymbol{m},\mathsf{\Sigma})\) random vectors
+% The command |randn(n,d)| generates \(n\) IID Gaussian (normal) random
+% \(d\)-vectors with distribution
+% \(\mathcal{N}(\boldsymbol{0},\mathsf{I})\).  If we need Gaussian random
+% vectors with an arbitrary mean and covariance matrix, i.e.,
+% \(\boldsymbol{Z} \sim \mathcal{N}(\boldsymbol{m},\mathsf{\Sigma})\), then
+% we can make an affine transformation.
+%
+% If \(\mathsf{A}\) is an arbitrary \(d \times d\) matrix,
+% \(\boldsymbol{m}\) is an arbitrary \(d\)-vector, and \(\boldsymbol{X}
+% \sim \mathcal{N}(\boldsymbol{0},\mathsf{I})\), then
+%
+% \[ \boldsymbol{Z} = \boldsymbol{m} +  \mathsf{A} \boldsymbol{X} \]
+%
+% is automatically Gaussian with mean 
+%
+% \[ \mathbb{E}(\boldsymbol{Z}) = \mathbb{E}(\boldsymbol{m}) +  \mathsf{A}
+% \mathbb{E}(\boldsymbol{X}) = \boldsymbol{m} \]
+%
+% and variance 
+%
+% \[ \text{var}(\boldsymbol{Z}) =
+% \mathbb{E}\bigl[(\boldsymbol{Z} - \boldsymbol{m})(\boldsymbol{Z} -
+% \boldsymbol{m})^T \bigr] = \mathbb{E}\bigl[\mathsf{A}
+% \boldsymbol{X}\boldsymbol{X}^T \mathsf{A}^T \bigr] = \mathsf{A}
+% \mathbb{E} \bigl[\boldsymbol{X} \boldsymbol{X}^T \bigr] \mathsf{A}^T = \mathsf{A}
+% \mathsf{A}^T \]
+%
+% So if we can choose \(\mathsf{A}\) such that \( \mathsf{\Sigma} =
+% \mathsf{A} \mathsf{A}^T\), we have a way to generate Gaussian random
+% vectors with arbitrary mean and covariance matrix.  One way to do that is
+% using the Cholesky decomposition. Note that in our notation above our
+% random vectors are column vectors, but in our MATLAB notation below they
+% are row vectors.
+
+Sigma = [2 1; 1 1] %a symmetric positive-definite matrix
+eig(Sigma) %note that the eigenvalue are all positive
+Gaussian = @(n,m,B) bsxfun(@plus,m,randn(n,size(m,2))*B);
+   %function to generate n Gaussian random row vectors, where B corresponds
+   %to A'
+B = chol(Sigma) %uses the Cholesky decomposition to create an upper triangluar matrix such that B'B = Sigma
+   %note that this B corresponds to our A' above
+shouldBeSigma = B'*B %checking that this is Sigma
+m = [-1 3];
+figure
+Gaussianpts = Gaussian(1000,m,B); %generate some random vectors
+plot(Gaussianpts(:,1),Gaussianpts(:,2),'.') %plot the random vectors
+axis([-6 4 -1 7])
+
+%% 
+% We may check that the sample quantities are close to the population
+% quantities:
+
+shouldBeAlmostM = mean(Gaussianpts) %should be close to m
+shouldBeAlmostSigma = cov(Gaussianpts) %should be close to Sigma
+
+%%
+% Given a covariance matrix \(\mathsf{\Sigma}\) there are many matrices
+% \(\mathsf{A}\) satisfying \(\mathsf{\Sigma} = \mathsf{A} \mathsf{A}^T\).
+%  For example, if \(\mathsf{U}\) is any unitary matrix, i.e., any matrix
+%  satisfying \(\mathsf{U}^T \mathsf{U} = \mathsf{I}\), then
+%  \(\mathsf{\Sigma} = \mathsf{C} \mathsf{C}^T\) for \(\mathsf{C} =
+%  \mathsf{A}\mathsf{U}^T\).  Another way to find a matrix \(\mathsf{A}\)
+%  satisfying \(\mathsf{\Sigma} = \mathsf{A} \mathsf{A}^T\) is to use the
+%  singular value decomposition:  \(\mathsf{\Sigma} =
+%  \mathsf{U}\mathsf{\Gamma}\mathsf{V}'\), where \(\mathsf{U}\) and
+%  \(\mathsf{V}\) are unitary and \(\mathsf{\Gamma}\) is diagonal with
+%  non-negative entries.  Since \(\mathsf{\Sigma}\) is symmetric,
+%  \(\mathsf{U} = \mathsf{V}\), so one may choose
+%
+% \[ \mathsf{A} = \mathsf{U} \mathsf{\Gamma}^{1/2}. \]
+
+[U,Gamma] = svd(Sigma,'econ'); %computes the SVD decomposition 
+B = bsxfun(@times,sqrt(diag(Gamma)),U') % to create an upper triangluar matrix such that B'B = Sigma
+   %note that this B corresponds to our A' above
+shouldBeSigma = B'*B %checking that this is Sigma
+figure
+Gaussianpts = Gaussian(1000,m,B); %generate some random vectors
+plot(Gaussianpts(:,1),Gaussianpts(:,2),'.') %plot the random vectors
+axis([-6 4 -1 7])
+
+%% 
+% Again we may check that the sample quantities are close to the population
+% quantities:
+
+shouldBeAlmostM = mean(Gaussianpts) %should be close to m
+shouldBeAlmostSigma = cov(Gaussianpts) %should be close to Sigma
+
+%% Generating Exp(\(\lambda\)) Random Numbers by the Inverse Distribution Transformation
+% For random vectors that are not distributed uniformly or Gaussian, we may
+% sometimes use the inverse cumulative distribution function.  To genearate
+% an exponentially distributed random variable, \(Y \sim \)
+% Exp(\(\lambda\)), one uses the transformation
+%
+% \[ Y = \frac{-\log(X)}{\lambda}, \qquad X \sim [0,1]. \]
+%
+% Suppose that the taxis arrive at a rate of once per ten minutes,
+% \(\lambda = 0.1\) min\({}^{-1}\).  Then the average time required to wait
+% for two taxis to take your group of eight friends is \(20\) minutes,
+% which can be computed analytically and by Monte Carlo:
+
+twotaxiwait = @(n) -10*sum(log(rand(n,2)),2);
+avgwait = meanMC_g(twotaxiwait,0.01,0)
+
+%% Generating Discrete Random Numbers by the Inverse Distribution Transformation
+% Discrete random variables have their probablity mass functions,
+% \(\varrho\), and cumulative distribution functions, \(F\), given by
+% tables, e.g.,
+%
+% \[
+% \begin{array}{r|cccc}
+% y & 0 & 1 & 2 & 3 \\
+% \varrho(y) = \mathbb{P}(Y=y) & 0.2 & 0.4 & 0.3 & 0.1 \\
+% F(y) = \mathbb{P}(Y \le y) & 0.2 & 0.6 & 0.9 & 1 \\
+% \end{array}
+% \]
+
+yvals = 0:3 %ordered possible values of the random variable Y
+PDFvals = [0.2 0.4 0.3 0.1] %corresponding values of the PDF
+CDFvals = cumsum(PDFvals) %corresponding values of the CDF
+
+%%
+% Here is a plot of \(F\) and \(F^{-1}\)
+
+figure
+plot(yvals, CDFvals, '.', ...
+   [-1 yvals; yvals 4],[0 CDFvals; 0 CDFvals],'-', ...
+   'color',MATLABBlue)
+hold on
+plot(yvals, [0 CDFvals(1:3)], '.', ...
+   [yvals; yvals],[0 CDFvals(1:3); CDFvals],'-', ...
+   'color',MATLABOrange)
+axis([-1 4 -0.1 1.1])
+hlab = xlabel('\(y\)','color',MATLABBlue); %x-axis label
+hlabPos = get(hlab,'Position'); %get its position
+haxPos = get(gca,'Position'); %get position of the whole plot
+hlab.Position = hlabPos - [0.5 0 0]; %move label left
+text(hlabPos(1)+0.2,hlabPos(2)-0.07,'\(F^{-1}(x)\)','color',MATLABOrange)
+   %add another x-axis label
+hlab = ylabel('\(F(y)\)','color',MATLABBlue); %y-axis label
+hlabPos = get(hlab,'Position'); %get its position
+hlab.Position = hlabPos - [0 0.15 0]; %move label down
+text(hlabPos(1)-0.15,hlabPos(2)+0.15,'\(x\)','color',MATLABOrange, ...
+   'rotation',90); %add another y-axis label
+set(gca,'Position', haxPos); %re-set plot position
+print -depsc discreteFFinv.eps %print the plot
+
+%%
+% We can use the |griddedInterpolant| to build the quantile function,
+% \(F^{-1}\).
+
+quantileFun = griddedInterpolant(CDFvals,yvals,'next'); %next neighbor interpolation
+
+%%
+% This allows us to generate IID values of \(Y\).
+
+X = rand(1,8) %generate IID standard uniform random numbers
+Y = quantileFun(X) %generate IID random numbers with the desired distribution
+
+%%
+% We can check the sample statistics of this random number generator and
+% note that they are close to the correponding population values
+
+Y = quantileFun(rand(1e4,1)); %generate a large number of Y values
+prob0 = mean(Y == 0) %sample proportion of 0 values, should be close to 0.2
+prob1 = mean(Y == 1) %sample proportion of 1 values, should be close to 0.4
+prob2 = mean(Y == 2) %sample proportion of 2 values, should be close to 0.3
+prob3 = mean(Y == 3) %sample proportion of 3 values, should be close to 0.1
+
+%% Generating Gaussian Random Variates
+% The Gaussian random number generator, |randn|, is built on the uniform
+% random number generator, |rand|, in a rather sophisticated way.  But
+% |randn| is a bit   slower than |rand|.  E.g.,
+
+n = 1e6; %number of random variables needed
+tic
+X = rand(n,1); %generate uniform random numbers
+toc
+tic
+Z = randn(n,1); %generate Gaussian random numbers
+toc
+
+%% Generating Gaussian Random Variates by the Inverse CDF Transform
+% MATLAB has an inverse normal transform, which can be used to generate
+% Gaussian random variables
+
+tic
+ZCDF = norminv(rand(n,1)); %generate Gaussian random numbers by the inverse CDF transform
+toc
+
+%%
+% This method is slower than |randn|, but is useful when the uniform random
+% numbers come from non-IID uniform low discrepancy points.
+
+%% Generating Gaussian Random Variates by the Acceptance-Rejection Method
+% Here we explore one possible way of generating Gaussian random numbers
+% from uniform random numbers.  If \((X_i, U_i, V_i)
+% \overset{\text{IID}}{\sim} \mathcal{U}[0,1]^3\), and \(Y_i = \log(X_i)\),
+% then we accept
+%
+% \[ \text{sign}(V_i - 0.5)Y_i \]
+% 
+% as a \(\mathcal{N}(0,1)\) random number provided that \(U_i \le
+% \exp(-(Y_i+1)^2/2)\).  Since we only accept \(\sqrt{\pi/(2 {\rm
+% e})}\approx 0.76\) of the values, we must generate, say \(1.4 > 1/0.76\)
+% times as many \((X_i, U_i, V_i)\) as the number of Gaussian random
+% variables that we need.
+
+tic
+XUV = rand(1.4*n,3); %some uniform random numbers
+Y = log(XUV(:,1)); %compute Y
+keep = XUV(:,2) <= exp(-(Y+1).^2/2); %these are the ones that we keep
+ZAR = Y(keep); %grab the ones that we want
+ZAR = ZAR.*sign(XUV(keep,3)-0.5); %apply the sign
+ZAR = ZAR(1:n); %keep only as many as we need
+toc
+
+%%
+% This method is much slower than |randn|, but we can use it for other
+% distributions as well.
+
+%% Generating Gaussian Random Variates by the Box-Muller Method
+% Another method for generating the two IID Gaussian random variables at a
+% time is as follows
+
+tic
+ZBM = rand(n,2); %uniform random vectors
+ZBM = [sqrt(-2*log(ZBM(:,1))) (2*pi)*ZBM(:,2)];
+ZBM = [ZBM(:,1).*cos(ZBM(:,2)) ZBM(:,1).*sin(ZBM(:,2))]; %Gaussian random vectors
+toc
+
+tic
+Z2 = randn(n,2); %generate Gaussian random numbers
+toc
+
+%%
+% The Box-Muller method is slower, but somewhat more competitive than
+% acceptance-rejection.
+
+%%
+% _Author: Fred J. Hickernell_
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,172 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Multivariate Normal Probabilities</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="MultivariateNormalProbabilityExample.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Multivariate Normal Probabilities</h1><!--introduction--><p>The multivariate normal probability is defined as</p><p>\[ p = \int_{[\boldsymbol{a},\boldsymbol{b}]} \frac{\exp\bigl(-(\boldsymbol{x} - \boldsymbol{\mu})^T \Sigma^{-1} (\boldsymbol{x} - \boldsymbol{\mu})/2\bigr)} {\sqrt{(2\pi)^d \textrm{det}(\Sigma)}} \, \mathrm{d} \boldsymbol{x}. \]</p><p>where \(\boldsymbol{a}\), \(\boldsymbol{b}\), \(\boldsymbol{\mu}\), and \(\Sigma\) are parameters. Except for very special cases of these parameters, \(p\) must be approximated numerically.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Parameter Set-Up</a></li><li><a href="#5">IID sampling</a></li><li><a href="#6">Scrambled Sobol sampling</a></li><li><a href="#7">Shifted lattice sampling</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> MultivariateNormalProbabilityExample <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeDisplay <span class="comment">%clean up</span>
+format <span class="string">long</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeDisplay".
+Error in MultivariateNormalProbabilityExample (line 17)
+gail.InitializeDisplay %clean up </pre><h2>Parameter Set-Up<a name="3"></a></h2><p>Let's set up one example to look at</p><pre class="codeinput">C = [4 1 1; 0 1 0.5; 0 0 0.25];
+Sigma = C'*C <span class="comment">%the covariance matrix</span>
+mu = 0; <span class="comment">%mean of the distribution</span>
+a = [-6 -2 -2]; <span class="comment">%lower left corner of the hyperbox</span>
+b = [5 2 1]; <span class="comment">%upper right coner of the hyperbox</span>
+alpha = 0.01; <span class="comment">%uncertainty</span>
+absTol = 2e-4; <span class="comment">%absolute error tolerance</span>
+errMeth = <span class="string">'g'</span>; <span class="comment">%use adaptive method to automatically meet tolerance</span>
+</pre><p>The class <tt>multivarGauss</tt> has been constructed to compute the above probability via different methods.  We will illustrate some of methods below.  There is an important transformation by Alan Genz, that turns this \(d\)-dimensional integeral over \([\boldsymbol{a}, \boldsymbol{b}]\) into a \(d-1\)-dimensional integeral over \([0, 1]^{d-1}\).  We will use this for most of our examples</p><h2>IID sampling<a name="5"></a></h2><p>First we try IID sampling.</p><pre class="codeinput">[MVNProbIID] = multivarGauss(<span class="string">'a'</span>,a,<span class="string">'b'</span>,b,<span class="string">'Cov'</span>,Sigma, <span class="string">'errMeth'</span>,errMeth, <span class="keyword">...</span>
+   <span class="string">'cubMeth'</span>,<span class="string">'IID'</span>,<span class="string">'intMeth'</span>,<span class="string">'Genz'</span>,<span class="string">'absTol'</span>,absTol) <span class="comment">%set up object</span>
+[MVNProbIIDprob, IIDOut] = compProb(MVNProbIID); <span class="comment">%compute probability</span>
+fprintf([<span class="string">'The probability is %2.6f +/- %1.6f via IID sampling \n'</span> <span class="keyword">...</span>
+   <span class="string">'   which takes %3.6f seconds and %8.0f samples.\n'</span>], <span class="keyword">...</span>
+   MVNProbIIDprob, absTol, IIDOut.time, IIDOut.ntot)
+</pre><h2>Scrambled Sobol sampling<a name="6"></a></h2><p>Next we try scrambled Sobol Sampling</p><pre class="codeinput">MVNProbSobol = multivarGauss(<span class="string">'a'</span>,a,<span class="string">'b'</span>,b,<span class="string">'Cov'</span>,Sigma, <span class="string">'errMeth'</span>,errMeth, <span class="keyword">...</span>
+   <span class="string">'cubMeth'</span>,<span class="string">'Sobol'</span>,<span class="string">'intMeth'</span>,<span class="string">'Genz'</span>,<span class="string">'absTol'</span>,absTol) <span class="comment">%set up object</span>
+[MVNProbSobolprob, SobolOut] = compProb(MVNProbSobol); <span class="comment">%compute probability</span>
+fprintf([<span class="string">'The probability is %2.6f +/- %1.6f via IID sampling \n'</span> <span class="keyword">...</span>
+   <span class="string">'   which takes %3.6f seconds and %8.0f samples.\n'</span>], <span class="keyword">...</span>
+   MVNProbSobolprob, absTol, SobolOut.time, SobolOut.n)
+</pre><h2>Shifted lattice sampling<a name="7"></a></h2><p>Next we try shifted lattice Sampling</p><pre class="codeinput">MVNProbLattice = multivarGauss(<span class="string">'a'</span>,a,<span class="string">'b'</span>,b,<span class="string">'Cov'</span>,Sigma, <span class="string">'errMeth'</span>,errMeth, <span class="keyword">...</span>
+   <span class="string">'cubMeth'</span>,<span class="string">'lattice'</span>,<span class="string">'intMeth'</span>,<span class="string">'Genz'</span>,<span class="string">'absTol'</span>,absTol) <span class="comment">%set up object</span>
+[MVNProbLatticeprob, latticeOut] = compProb(MVNProbSobol); <span class="comment">%compute probability</span>
+fprintf([<span class="string">'The probability is %2.6f +/- %1.6f via IID sampling \n'</span> <span class="keyword">...</span>
+   <span class="string">'   which takes %3.6f seconds and %8.0f samples.\n'</span>], <span class="keyword">...</span>
+   MVNProbLatticeprob, absTol, latticeOut.time, latticeOut.n)
+</pre><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Multivariate Normal Probabilities
+% The multivariate normal probability is defined as 
+%
+% \[
+% p = \int_{[\boldsymbol{a},\boldsymbol{b}]} 
+% \frac{\exp\bigl(-(\boldsymbol{x} - \boldsymbol{\mu})^T \Sigma^{-1} 
+% (\boldsymbol{x} - \boldsymbol{\mu})/2\bigr)}
+% {\sqrt{(2\pi)^d \textrm{det}(\Sigma)}} \, \mathrm{d} \boldsymbol{x}.
+% \]
+%
+% where \(\boldsymbol{a}\), \(\boldsymbol{b}\), \(\boldsymbol{\mu}\), and
+% \(\Sigma\) are parameters. Except for very special cases of these
+% parameters, \(p\) must be approximated numerically.
+
+%%
+function MultivariateNormalProbabilityExample %make it a function to not overwrite other variables
+gail.InitializeDisplay %clean up 
+format long
+
+%% Parameter Set-Up
+% Let's set up one example to look at
+C = [4 1 1; 0 1 0.5; 0 0 0.25];
+Sigma = C'*C %the covariance matrix
+mu = 0; %mean of the distribution
+a = [-6 -2 -2]; %lower left corner of the hyperbox
+b = [5 2 1]; %upper right coner of the hyperbox
+alpha = 0.01; %uncertainty
+absTol = 2e-4; %absolute error tolerance
+errMeth = 'g'; %use adaptive method to automatically meet tolerance
+
+%% 
+% The class |multivarGauss| has been constructed to compute the above
+% probability via different methods.  We will illustrate some of methods
+% below.  There is an important transformation by Alan Genz, that turns
+% this \(d\)-dimensional integeral over \([\boldsymbol{a},
+% \boldsymbol{b}]\) into a \(d-1\)-dimensional integeral over \([0,
+% 1]^{d-1}\).  We will use this for most of our examples
+
+%% IID sampling
+% First we try IID sampling.
+[MVNProbIID] = multivarGauss('a',a,'b',b,'Cov',Sigma, 'errMeth',errMeth, ...
+   'cubMeth','IID','intMeth','Genz','absTol',absTol) %set up object
+[MVNProbIIDprob, IIDOut] = compProb(MVNProbIID); %compute probability
+fprintf(['The probability is %2.6f +/- %1.6f via IID sampling \n' ...
+   '   which takes %3.6f seconds and %8.0f samples.\n'], ...
+   MVNProbIIDprob, absTol, IIDOut.time, IIDOut.ntot)
+
+%% Scrambled Sobol sampling
+% Next we try scrambled Sobol Sampling
+MVNProbSobol = multivarGauss('a',a,'b',b,'Cov',Sigma, 'errMeth',errMeth, ...
+   'cubMeth','Sobol','intMeth','Genz','absTol',absTol) %set up object
+[MVNProbSobolprob, SobolOut] = compProb(MVNProbSobol); %compute probability
+fprintf(['The probability is %2.6f +/- %1.6f via IID sampling \n' ...
+   '   which takes %3.6f seconds and %8.0f samples.\n'], ...
+   MVNProbSobolprob, absTol, SobolOut.time, SobolOut.n)
+
+%% Shifted lattice sampling
+% Next we try shifted lattice Sampling
+MVNProbLattice = multivarGauss('a',a,'b',b,'Cov',Sigma, 'errMeth',errMeth, ...
+   'cubMeth','lattice','intMeth','Genz','absTol',absTol) %set up object
+[MVNProbLatticeprob, latticeOut] = compProb(MVNProbSobol); %compute probability
+fprintf(['The probability is %2.6f +/- %1.6f via IID sampling \n' ...
+   '   which takes %3.6f seconds and %8.0f samples.\n'], ...
+   MVNProbLatticeprob, absTol, latticeOut.time, latticeOut.n)
+
+%%
+% _Author: Fred J. Hickernell_
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,255 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Simulation of the Game of Craps</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="CrapsSimulation.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Simulation of the Game of Craps</h1><!--introduction--><p>The game of craps involves the shooter throwing two dice.  The payoff depends on the sum of the numbers on the dice.  This script simulates the proportion of times that the shooter wins.</p><p><img vspace="5" hspace="5" src="../how-to-play-craps.jpg" alt=""> </p><p>On the first roll of the two dice, the shooter</p><div><ul><li>Automatically <i>wins</i> if the numbers on the dice sum to 7 or 11, and</li><li>Automtically <i>loses</i> if the numbers on the dice sum to 2, 3, or 12.</li></ul></div><p>If the first roll of the two dice results in a sum of 4, 5, 6, 8, 9, or 10, then the shooter rolls again and again until either</p><div><ul><li>the sum is the same number as the first roll, in which case the shooter <i>wins</i> , or</li><li>the sum is a 7, in which case the shooter <i>loses</i>.</li></ul></div><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Random variable generator giving wins and losses</a></li><li><a href="#5">Computing the probability of a win by the shooter</a></li><li><a href="#8">Monte Carlo answers do <i>not</i> converge montonically</a></li><li><a href="#10">Craps function that provides <tt>nRounds</tt> of IID wins/losses</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> CrapsSimulation
+</pre><h2>Random variable generator giving wins and losses<a name="3"></a></h2><p>To perform the simulation we must create a function that produces <tt>nRounds</tt> of independent and identically distributed (IID) instances of the game of craps.  The function <tt>craps</tt> is defined at the end of this file.</p><p>By providing an input to the function <tt>craps</tt>, we get an IID vector of wins (ones) or losses (zeros)</p><pre class="codeinput">wins = craps(8)
+</pre><pre class="codeoutput">wins =
+  8&times;1 logical array
+   1
+   1
+   0
+   1
+   1
+   0
+   1
+   0
+</pre><p>And if we do it again, we get a different (random) output:</p><pre class="codeinput">wins = craps(8)
+</pre><pre class="codeoutput">wins =
+  8&times;1 logical array
+   0
+   0
+   0
+   0
+   1
+   0
+   0
+   0
+</pre><h2>Computing the probability of a win by the shooter<a name="5"></a></h2><p>The probability of a win is <i>approximately</i> the sample proportion (sample mean) of wins over a large number rounds.  For example</p><pre class="codeinput">tic, probWin = mean(craps(100)), toc
+tic, probWin = mean(craps(100)), toc
+</pre><pre class="codeoutput">probWin =
+    0.4800
+Elapsed time is 0.020592 seconds.
+probWin =
+    0.5500
+Elapsed time is 0.001243 seconds.
+</pre><p>Note that the proportion is close to 0.5, but with such a small sample, how can we know how accurate our answer is?  We will see later that the error using <tt>nRounds</tt> for our sample proportion is about \(1/\sqrt{\texttt{nRounds}}\).  Thus, using <tt>nRounds = 1e6</tt> should give an error of about 0.001.</p><pre class="codeinput">tic, probWin = mean(craps(1e6)), toc
+tic, probWin = mean(craps(1e6)), toc
+</pre><pre class="codeoutput">probWin =
+    0.4924
+Elapsed time is 8.485663 seconds.
+probWin =
+    0.4937
+Elapsed time is 9.135228 seconds.
+</pre><p>With a win probability of about 0.493, this game slightly favors the house.</p><h2>Monte Carlo answers do <i>not</i> converge montonically<a name="8"></a></h2><p>Suppose that we successively increase the number of observations by one and look how the sample mean approaches the true mean</p><pre class="codeinput">tic
+nSample = 1000;
+crapsResults = craps(nSample);
+probWinVec = cumsum(crapsResults)./(1:nSample)';
+semilogx((1:nSample)',probWinVec,[1 nSample],[probWin probWin],<span class="string">'--'</span>)
+xlabel(<span class="string">'Sample Size, \(n\)'</span>)
+ylabel(<span class="string">'Win Probability'</span>)
+toc
+</pre><pre class="codeoutput">Elapsed time is 0.434025 seconds.
+</pre><img vspace="5" hspace="5" src="CrapsSimulation_01.png" alt=""> <p>As the plot shows, the approximations oscillate around the true answer, but the oscillations decrease in size as the sample size increases.</p><h2>Craps function that provides <tt>nRounds</tt> of IID wins/losses<a name="10"></a></h2><pre class="codeinput"><span class="keyword">function</span> wins = craps(nRounds)
+   wins(nRounds,1) = false; <span class="comment">%initialize a logical vector of size nRounds</span>
+   <span class="keyword">for</span> i = 1:nRounds <span class="comment">%generate a logical vector of wins/losses</span>
+      firstRoll = sum(ceil(6*rand(1,2))); <span class="comment">%sum of two dice, each uniformly having 1 through 6</span>
+      <span class="keyword">if</span> any(firstRoll == [7 11]) <span class="comment">%automatic win</span>
+         wins(i) = true;
+      <span class="keyword">elseif</span> any(firstRoll == [2 3 12]) <span class="comment">%automatic loss</span>
+         wins(i) = false;
+      <span class="keyword">else</span> <span class="comment">%firstRoll is a 4, 5, 6, 8, 9, or 10</span>
+         <span class="keyword">while</span> true <span class="comment">%keep rolling until win or lose</span>
+            nextRoll = sum(ceil(6*rand(1,2))); <span class="comment">%try to repeat firstRoll</span>
+            <span class="keyword">if</span> nextRoll == firstRoll <span class="comment">%shooter wins</span>
+               wins(i) = true;
+               <span class="keyword">break</span> <span class="comment">%round is over</span>
+            <span class="keyword">elseif</span> nextRoll == 7 <span class="comment">%shooter loses</span>
+               wins(i) = false;
+               <span class="keyword">break</span> <span class="comment">%round is over</span>
+            <span class="keyword">end</span> <span class="comment">%otherwise roll again</span>
+         <span class="keyword">end</span>
+      <span class="keyword">end</span> <span class="comment">%the ith round is over</span>
+   <span class="keyword">end</span> <span class="comment">%nRounds rounds are over</span>
+<span class="keyword">end</span> <span class="comment">%end of craps function definition</span>
+</pre><pre class="codeinput"><span class="keyword">end</span> <span class="comment">%end of CrapsSimulation function definition</span>
+</pre><pre class="codeoutput">Warning: Error updating Text.
+
+ String scalar or character vector must have valid interpreter syntax:
+Sample Size, \(n\)
+ 
+</pre><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Simulation of the Game of Craps 
+% The game of craps involves the shooter throwing two dice.  The payoff
+% depends on the sum of the numbers on the dice.  This script simulates the
+% proportion of times that the shooter wins.
+% 
+% <<../how-to-play-craps.jpg>>
+%
+% On the first roll of the two dice, the shooter
+%
+% * Automatically _wins_ if the numbers on the dice sum to 7 or 11, and
+% * Automtically _loses_ if the numbers on the dice sum to 2, 3, or 12.
+%
+% If the first roll of the two dice results in a sum of 4, 5, 6, 8, 9, or
+% 10, then the shooter rolls again and again until either
+%
+% * the sum is the same number as the first roll, in which case the shooter
+% _wins_ , or
+% * the sum is a 7, in which case the shooter _loses_.
+
+%% 
+function CrapsSimulation
+
+%% Random variable generator giving wins and losses
+% To perform the simulation we must create a function that produces
+% |nRounds| of independent and identically distributed (IID) instances of
+% the game of craps.  The function |craps| is defined at the end of this
+% file.
+%
+% By providing an input to the function |craps|, we get an IID vector of
+% wins (ones) or losses (zeros)
+
+wins = craps(8)
+
+%% 
+% And if we do it again, we get a different (random) output:
+
+wins = craps(8)
+
+%% Computing the probability of a win by the shooter
+% The probability of a win is _approximately_ the sample proportion (sample
+% mean) of wins over a large number rounds.  For example
+
+tic, probWin = mean(craps(100)), toc
+tic, probWin = mean(craps(100)), toc
+
+%%
+% Note that the proportion is close to 0.5, but with such a small sample,
+% how can we know how accurate our answer is?  We will see later that the
+% error using |nRounds| for our sample proportion is about
+% \(1/\sqrt{\texttt{nRounds}}\).  Thus, using |nRounds = 1e6| should give
+% an error of about 0.001.
+
+tic, probWin = mean(craps(1e6)), toc
+tic, probWin = mean(craps(1e6)), toc
+
+%%
+% With a win probability of about 0.493, this game slightly favors the
+% house.
+%
+
+%% Monte Carlo answers do _not_ converge montonically
+% Suppose that we successively increase the number of observations by one
+% and look how the sample mean approaches the true mean
+
+tic
+nSample = 1000;
+crapsResults = craps(nSample);
+probWinVec = cumsum(crapsResults)./(1:nSample)';
+semilogx((1:nSample)',probWinVec,[1 nSample],[probWin probWin],'REPLACE_WITH_DASH_DASH')
+xlabel('Sample Size, \(n\)')
+ylabel('Win Probability')
+toc
+
+%%
+% As the plot shows, the approximations oscillate around the true answer,
+% but the oscillations decrease in size as the sample size increases.
+   
+%% Craps function that provides |nRounds| of IID wins/losses
+function wins = craps(nRounds)
+   wins(nRounds,1) = false; %initialize a logical vector of size nRounds
+   for i = 1:nRounds %generate a logical vector of wins/losses
+      firstRoll = sum(ceil(6*rand(1,2))); %sum of two dice, each uniformly having 1 through 6
+      if any(firstRoll == [7 11]) %automatic win
+         wins(i) = true;
+      elseif any(firstRoll == [2 3 12]) %automatic loss
+         wins(i) = false;
+      else %firstRoll is a 4, 5, 6, 8, 9, or 10
+         while true %keep rolling until win or lose
+            nextRoll = sum(ceil(6*rand(1,2))); %try to repeat firstRoll
+            if nextRoll == firstRoll %shooter wins
+               wins(i) = true;
+               break %round is over
+            elseif nextRoll == 7 %shooter loses
+               wins(i) = false;
+               break %round is over
+            end %otherwise roll again
+         end
+      end %the ith round is over
+   end %nRounds rounds are over
+end %end of craps function definition
+
+end %end of CrapsSimulation function definition
+
+%%
+% _Author: Fred J. Hickernell_
+
+
+##### SOURCE END #####
+--></body></html>

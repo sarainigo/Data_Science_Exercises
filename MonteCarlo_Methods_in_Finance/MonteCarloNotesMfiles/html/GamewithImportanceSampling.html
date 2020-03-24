@@ -1,0 +1,141 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>An Example of Importance Sampling for a Game</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="GamewithImportanceSampling.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>An Example of Importance Sampling for a Game</h1><!--introduction--><p>Consider a game where \(X_1, X_2 \overset{\textrm{IID}}{\sim} \mathcal{U}[0,1]\) are drawn with a payoff of</p><p>\[ Y = \text{payoff}(X_1,X_2) = \begin{cases} \$100, &amp; 1.7 \le X_1 + X_2 \le 2, \\ 0, &amp; 0 \le X_1 + X_2 &lt; 1.7, \end{cases} \]</p><p>What is the expected payoff of this game?</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Vanilla Monte Carlo</a></li><li><a href="#2">Monte Carlo with Importance Sampling</a></li></ul></div><h2>Vanilla Monte Carlo<a name="1"></a></h2><p>With ordinary Monte Carlo we do the following:</p><p>\[ \mu = \mathbb{E}(Y) = \int_{[0,1]^2} \text{payoff}(x_1,x_2) \, \mathrm{d} x_1 \mathrm{d}x_2.\]</p><pre class="codeinput">Y = @(n) 100*(sum(rand(n,2),2)&gt;=1.7); <span class="comment">%is sum large enough, then you win</span>
+absTol = 0.005; <span class="comment">%half a penny tolerance</span>
+[expPay, out] = meanMC_g(Y,absTol,0);
+fprintf(<span class="string">'The expected payoff = $%3.2f +/- $%1.3f\n'</span>, <span class="keyword">...</span>
+   expPay,absTol)
+fprintf(<span class="string">'   using %6.0f samples and %3.6f seconds\n'</span>, <span class="keyword">...</span>
+   out.ntot,out.time)
+</pre><pre class="codeoutput error">Undefined function 'meanMC_g' for input arguments of type 'function_handle'.
+Error in GamewithImportanceSampling (line 21)
+[expPay, out] = meanMC_g(Y,absTol,0);</pre><h2>Monte Carlo with Importance Sampling<a name="2"></a></h2><p>We may add the importance sampling to increase the number of samples with positive payoffs. Let</p><p>\[ \boldsymbol{Z} = (X_1^{1/(p+1)}, X_2^{1/(p+1)}), \qquad \boldsymbol{X} \sim \mathcal{U}[0,1]^2. \]</p><p>This means that \(Z_1\) and \(Z_2\) are IID with common CDF \(F(z) = z^{p+1}\) and common PDF \(\varrho(z) = (p+1)z^{p}\).  Thus,</p><p>\[ \mu = \mathbb{E}(Y) = \int_{[0,1]^2} \frac{\text{payoff}(z_1,z_2)}{(p+1)^2(z_1z_2)^{p}} \, \varrho(z_1) \varrho(z_2) \, \mathrm{d} z_1 \mathrm{d}z_2 = \int_{[0,1]^2} \frac{\text{payoff}(x_1^{1/(p+1)},x_2^{1/(p+1)})}{(p+1)^2(x_1x_2)^{p/(p+1)}} \, \mathrm{d} x_1 \mathrm{d}x_2\]</p><pre class="codeinput">p = 1;
+YIS = @(x) (100/(p+1).^2)*(sum(x.^(1/(p+1)),2)&gt;=1.7)./ <span class="keyword">...</span>
+   ((prod(x,2).^(p/(p+1)))); <span class="comment">%is sum large enough, then you win</span>
+[expPay, out] = meanMC_g(@(n) YIS(rand(n,2)),absTol,0);
+fprintf(<span class="string">'Using importance sampling, the expected payoff = $%3.2f +/- $%1.3f\n'</span>, <span class="keyword">...</span>
+   expPay,absTol)
+fprintf(<span class="string">'   using %6.0f samples and %3.6f seconds\n'</span>, <span class="keyword">...</span>
+   out.ntot,out.time)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% An Example of Importance Sampling for a Game
+% Consider a game where \(X_1, X_2 \overset{\textrm{IID}}{\sim}
+% \mathcal{U}[0,1]\) are drawn with a payoff of 
+%
+% \[ 
+% Y = \text{payoff}(X_1,X_2) = \begin{cases} \$100, & 1.7 \le X_1 + X_2 \le 2, \\
+% 0, & 0 \le X_1 + X_2 < 1.7,
+% \end{cases}
+% \]
+%
+% What is the expected payoff of this game?
+
+%% Vanilla Monte Carlo
+% With ordinary Monte Carlo we do the following:
+%
+% \[ \mu = \mathbb{E}(Y) = \int_{[0,1]^2} \text{payoff}(x_1,x_2) \,
+% \mathrm{d} x_1 \mathrm{d}x_2.\]
+
+Y = @(n) 100*(sum(rand(n,2),2)>=1.7); %is sum large enough, then you win
+absTol = 0.005; %half a penny tolerance
+[expPay, out] = meanMC_g(Y,absTol,0);
+fprintf('The expected payoff = $%3.2f +/- $%1.3f\n', ...
+   expPay,absTol)
+fprintf('   using %6.0f samples and %3.6f seconds\n', ...
+   out.ntot,out.time)
+
+%% Monte Carlo with Importance Sampling
+% We may add the importance sampling to increase the number of samples with
+% positive payoffs. Let 
+%
+% \[ \boldsymbol{Z} = (X_1^{1/(p+1)}, X_2^{1/(p+1)}), \qquad
+% \boldsymbol{X} \sim \mathcal{U}[0,1]^2. \]
+%
+% This means that \(Z_1\) and \(Z_2\) are IID with common CDF \(F(z) =
+% z^{p+1}\) and common PDF \(\varrho(z) = (p+1)z^{p}\).  Thus,
+%
+% \[ \mu = \mathbb{E}(Y) = \int_{[0,1]^2}
+% \frac{\text{payoff}(z_1,z_2)}{(p+1)^2(z_1z_2)^{p}} \, \varrho(z_1)
+% \varrho(z_2) \, \mathrm{d} z_1 \mathrm{d}z_2 = \int_{[0,1]^2}
+% \frac{\text{payoff}(x_1^{1/(p+1)},x_2^{1/(p+1)})}{(p+1)^2(x_1x_2)^{p/(p+1)}}
+% \, \mathrm{d} x_1 \mathrm{d}x_2\]
+
+p = 1;
+YIS = @(x) (100/(p+1).^2)*(sum(x.^(1/(p+1)),2)>=1.7)./ ...
+   ((prod(x,2).^(p/(p+1)))); %is sum large enough, then you win
+[expPay, out] = meanMC_g(@(n) YIS(rand(n,2)),absTol,0);
+fprintf('Using importance sampling, the expected payoff = $%3.2f +/- $%1.3f\n', ...
+   expPay,absTol)
+fprintf('   using %6.0f samples and %3.6f seconds\n', ...
+   out.ntot,out.time)
+
+
+##### SOURCE END #####
+--></body></html>

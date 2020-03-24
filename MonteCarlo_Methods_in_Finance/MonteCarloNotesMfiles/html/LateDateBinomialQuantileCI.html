@@ -1,0 +1,201 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Late for a Date</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="LateDateBinomialQuantileCI.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Late for a Date</h1><!--introduction--><p>This example demonstrates the confidence intervals for probabilities and quantiles assuming that you must take different modes of transportation to get to your date.</p><p>You leave your office and walk to the parking lot.  You then drive to Chinatown, park your car, and walk to MingHin restaurant to meet your friends.  For illustration purposes, we assume that the times of each segment are distributed uniformly:</p><p>\begin{align*} T_1  &amp;= \text{ time to walk to your car } \sim \mathcal{U}[4,7], \\ T_2  &amp;= \text{ time to drive to Chinatown } \sim \mathcal{U}[10,15], \\ T_3  &amp;= \text{ time to park your car } \sim \mathcal{U}[0,12], \\ T_4  &amp;= \text{ time to walk to Ming Hin } \sim \mathcal{U}[2,8], \\ T_{\text{total}}  &amp;= \text{ total travel time } = T_1 + T_2 + T_3 + T_4. \end{align*}</p><p>All times are given in minutes.  We want to know</p><div><ul><li>what is the average time required to get to your date,</li><li>what is the probability of needing more than \(35\) minutes to get to your date, and</li><li>what is the time you need to leave by to guarantee with \(98\%\) confidence that you will be on time.</li></ul></div><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Simulating travel times</a></li><li><a href="#4">The average travel time</a></li><li><a href="#5">The probability of being late</a></li><li><a href="#7">The cut-off time for being on time with a high probability</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> LateDateBinomialQuantileCI <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeDisplay <span class="comment">%initialize  the display parameters</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeDisplay".
+Error in LateDateBinomialQuantileCI (line 30)
+gail.InitializeDisplay %initialize  the display parameters</pre><h2>Simulating travel times<a name="3"></a></h2><p>First we construct a function that generates IID travel times.  If <span class="MathJax_Preview"><img src="LateDateBinomialQuantileCI_eq08132065238155506653.png" alt="$U_1, \ldots, U_4$"></span><script type="math/tex">U_1, \ldots, U_4</script> are IID <span class="MathJax_Preview"><img src="LateDateBinomialQuantileCI_eq14119233969004820687.png" alt="$\mathcal{U}[0,1]$"></span><script type="math/tex">\mathcal{U}[0,1]</script> random variables, then</p><p>\begin{align*} T_1  &amp;= 4 + 3 U_1, \\ T_2  &amp;= 10 + 5 U_2, \\ T_3  &amp;= 12 U_3, \\ T_4  &amp;= 2 + 6 U_4, \\ T_{\text{total}}  &amp; = T_1 + T_2 + T_3 + T_4 = 16 + 3U_1 + 5U_2 + 12U_3 + 6 U_4. \end{align*}</p><pre class="codeinput">Ttot = @(n) 16 + sum(bsxfun(@times,rand(n,4),[3 5 12 6]),2);
+</pre><h2>The average travel time<a name="4"></a></h2><p>The average travel time can be easily calculated analytically:</p><p>\[ \mu  = \mathbb{E}(T_{\text{total}}) = 16 + (3 + 5 + 12 + 6) \mathbb{E}(U) = 16 + 26 \times 1/2 = 29. \]</p><p>Monte Carlo methods can be used to approximate this as well:</p><pre class="codeinput">tic
+muhat = meanMC_g(Ttot,0.01,0) <span class="comment">%IID Monte Carlo with absolute error of 0.01</span>
+toc
+</pre><h2>The probability of being late<a name="5"></a></h2><p>If we only leave our office \(29\) minutes before our date, we will sometimes be early and sometimes be late.</p><pre class="codeinput">n = 1e4; <span class="comment">%number of samples</span>
+lateTime = 29; <span class="comment">%what time is considered late</span>
+Ttotval = Ttot(n); <span class="comment">%sample of n total times</span>
+lateDateBinCI = binomialCI(n,sum(Ttotval &gt; lateTime)) <span class="comment">%confidence interval for being too late</span>
+
+<span class="comment">% Since this is an important date we plan to leave \(35\) minutes</span>
+<span class="comment">% beforehand and hope to be early or on time. What is the chance that we</span>
+<span class="comment">% will be late?</span>
+<span class="comment">%</span>
+<span class="comment">% We now perform \(n\) trials, and count the number of late dates.  Then we</span>
+<span class="comment">% use |binomialCI| to compute a confidence interval on the probability of</span>
+<span class="comment">% being late for the date given that you leave \(35\) minutes beforehand.</span>
+
+n = 1e4; <span class="comment">%number of samples</span>
+lateTime = 35; <span class="comment">%what time is considered late</span>
+Ttotval = Ttot(n); <span class="comment">%sample of n total times</span>
+lateDateBinCI = binomialCI(n,sum(Ttotval &gt; lateTime)) <span class="comment">%confidence interval for being too late</span>
+</pre><p>The chance is of being late is around \(8\%\).</p><h2>The cut-off time for being on time with a high probability<a name="7"></a></h2><p>A related problem is determining how late we can leave our office and still get to the restaurant on time with a high probability, say, \(98\%\).  Now we use <tt>quantileCI</tt> as follows:</p><pre class="codeinput">p = 0.02; <span class="comment">%the probability of lateness that can be tolerated</span>
+extremeVal = [16 42]; <span class="comment">%the extreme values of the distribution</span>
+lateDateQuantCI = quantileCI(1-p,Ttotval,extremeVal) <span class="comment">%1-p quantile for total travel times</span>
+</pre><p>The worst \(2\%\) travel time is around \(36.7\) to \(38\) minutes.  You need to allow \(38\) minutes to make sure that you will be on time with at least a \(98\%\) probability.</p><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Late for a Date
+%
+% This example demonstrates the confidence intervals for probabilities and
+% quantiles assuming that you must take different modes of transportation
+% to get to your date.
+%
+% You leave your office and walk to the parking lot.  You then drive to
+% Chinatown, park your car, and walk to MingHin restaurant to meet your
+% friends.  For illustration purposes, we assume that the times of each
+% segment are distributed uniformly:
+%
+% \begin{align*}
+% T_1  &= \text{ time to walk to your car } \sim \mathcal{U}[4,7], \\
+% T_2  &= \text{ time to drive to Chinatown } \sim \mathcal{U}[10,15], \\
+% T_3  &= \text{ time to park your car } \sim \mathcal{U}[0,12], \\
+% T_4  &= \text{ time to walk to Ming Hin } \sim \mathcal{U}[2,8], \\
+% T_{\text{total}}  &= \text{ total travel time } = T_1 + T_2 + T_3 + T_4.
+% \end{align*}
+% 
+% All times are given in minutes.  We want to know 
+%
+% * what is the average time required to get to your date, 
+% * what is the probability of needing more than \(35\) minutes to get to
+% your date, and
+% * what is the time you need to leave by to guarantee with \(98\%\)
+% confidence that you will be on time.
+
+%%
+function LateDateBinomialQuantileCI %make it a function to not overwrite other variables
+gail.InitializeDisplay %initialize  the display parameters
+
+%% Simulating travel times
+% First we construct a function that generates IID travel times.  If $U_1,
+% \ldots, U_4$ are IID $\mathcal{U}[0,1]$ random variables, then 
+%
+% \begin{align*}
+% T_1  &= 4 + 3 U_1, \\
+% T_2  &= 10 + 5 U_2, \\
+% T_3  &= 12 U_3, \\
+% T_4  &= 2 + 6 U_4, \\
+% T_{\text{total}}  & = T_1 + T_2 + T_3 + T_4 = 16 + 3U_1 + 5U_2 + 12U_3 + 6 U_4.
+% \end{align*}
+
+Ttot = @(n) 16 + sum(bsxfun(@times,rand(n,4),[3 5 12 6]),2);
+
+%% The average travel time
+% The average travel time can be easily calculated analytically: 
+% 
+% \[
+% \mu  = \mathbb{E}(T_{\text{total}}) = 16 + (3 + 5 + 12 + 6) \mathbb{E}(U)
+% = 16 + 26 \times 1/2 = 29.
+% \]
+%
+% Monte Carlo methods can be used to approximate this as well:
+
+tic
+muhat = meanMC_g(Ttot,0.01,0) %IID Monte Carlo with absolute error of 0.01
+toc
+
+%% The probability of being late
+% If we only leave our office \(29\) minutes before our date, we will
+% sometimes be early and sometimes be late.  
+
+n = 1e4; %number of samples
+lateTime = 29; %what time is considered late
+Ttotval = Ttot(n); %sample of n total times
+lateDateBinCI = binomialCI(n,sum(Ttotval > lateTime)) %confidence interval for being too late
+
+% Since this is an important date we plan to leave \(35\) minutes
+% beforehand and hope to be early or on time. What is the chance that we
+% will be late?
+%
+% We now perform \(n\) trials, and count the number of late dates.  Then we
+% use |binomialCI| to compute a confidence interval on the probability of
+% being late for the date given that you leave \(35\) minutes beforehand.
+
+n = 1e4; %number of samples
+lateTime = 35; %what time is considered late
+Ttotval = Ttot(n); %sample of n total times
+lateDateBinCI = binomialCI(n,sum(Ttotval > lateTime)) %confidence interval for being too late
+
+%%
+% The chance is of being late is around \(8\%\).
+
+%% The cut-off time for being on time with a high probability
+% A related problem is determining how late we can leave our office and
+% still get to the restaurant on time with a high probability, say,
+% \(98\%\).  Now we use |quantileCI| as follows:
+
+p = 0.02; %the probability of lateness that can be tolerated
+extremeVal = [16 42]; %the extreme values of the distribution
+lateDateQuantCI = quantileCI(1-p,Ttotval,extremeVal) %1-p quantile for total travel times
+
+%%
+% The worst \(2\%\) travel time is around \(36.7\) to \(38\) minutes.  You
+% need to allow \(38\) minutes to make sure that you will be on time with
+% at least a \(98\%\) probability.
+%
+% _Author: Fred J. Hickernell_
+
+
+##### SOURCE END #####
+--></body></html>

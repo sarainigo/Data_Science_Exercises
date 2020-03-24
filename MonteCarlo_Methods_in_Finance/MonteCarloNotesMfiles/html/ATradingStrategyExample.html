@@ -1,0 +1,199 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>A Trading Strategy</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="ATradingStrategyExample.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>A Trading Strategy</h1><!--introduction--><p>This MATLAB script shows how to use (quasi-)Monte Carlo methods with the <tt>assetPath</tt> class to investigate a particular trading strategy.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Setting Up the AssetPath Object</a></li><li><a href="#3">Cautious Trading Strategy</a></li><li><a href="#4">Using Sobol' Sampling to Get the Answer Quicker</a></li></ul></div><pre class="codeinput">gail.InitializeWorkspaceDisplay <span class="comment">%initialize the workspace and the display parameters</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeWorkspaceDisplay".
+Error in ATradingStrategyExample (line 6)
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters</pre><h2>Setting Up the AssetPath Object<a name="2"></a></h2><p>Let \(S(t)\) denote the price of this stock at time \(t\) measured in years.  The geometric Brownian motion model of a stock price says that</p><p>\[ S(t) = S(0) \exp( (r^* - \sigma^2/2) t + \sigma B(t) ), \]</p><p>where</p><div><ul><li>\(S(0)\) is the initial stock price,</li><li>\(r^*\) is the <i>risk-neutral rate</i>,</li><li>\(\sigma\) is the constant <i>volatility</i>, and</li><li>\(B(t)\) is a Brownian motion.</li></ul></div><p>We set up an <tt>assetPath</tt> object with typical values of thes parameters</p><pre class="codeinput">inp.timeDim.timeVector = 1/52:1/52:1/2; <span class="comment">%weekly monitoring for half a year</span>
+inp.assetParam.initPrice = 100; <span class="comment">%initial stock price</span>
+inp.assetParam.interest = 0.02; <span class="comment">%risk-neutral rate</span>
+inp.assetParam.volatility = 0.5; <span class="comment">%volatility</span>
+risklessInterest = 0.01; <span class="comment">%interest for putting money in bank</span>
+cutoff = 75; <span class="comment">%cutoff where we should sell</span>
+absTol = 0.05; <span class="comment">%absolute tolerance</span>
+relTol = 0; <span class="comment">%relative tolerance</span>
+StockMC = assetPath(inp)
+</pre><h2>Cautious Trading Strategy<a name="3"></a></h2><p>We know that according to the geometric Brownian motion model, the expected stock price after half a year should be \(S(0) \exp(r^*/2)\), which means a return of \(S(0) (\exp(r^*/2)-1)\).  This corresponds to a disounted return of \(S(0) (\exp((r^*-r)/2)-1)\), where \(r\) is the risk-free rate. But suppose that we decide to protect against adverse loss by selling if the stock ever gets below \(\$75\).  Will this affect our expected return?  Let's see.</p><pre class="language-matlab">
+<span class="keyword">function</span> val = returnValue(obj,nx,cutoff,risklessInterest)
+paths = genPaths(obj,nx); <span class="comment">%generate stock paths</span>
+[whichDip,whenDip] = max(paths &lt; cutoff,[],2); <span class="comment">%find which drop too low</span>
+indPaths = sub2ind(size(paths),find(whichDip), whenDip(whichDip)); <span class="comment">%transform to linear indices</span>
+val(size(paths,1),1) = 0; <span class="comment">%initialize value</span>
+val(whichDip) = paths(indPaths) <span class="keyword">...</span>
+   .* exp(-risklessInterest*obj.timeDim.timeVector(whenDip(whichDip)))'; <span class="comment">%values of paths that drop too low</span>
+val(~whichDip) = paths(~whichDip,end) <span class="keyword">...</span>
+   .* exp(-risklessInterest*obj.timeDim.timeVector(end)); <span class="comment">%values of paths that do not drop too low</span>
+
+
+</pre><pre class="codeinput">fprintf(1,<span class="string">'The expected discounted return if one just waits six months is $%6.4f\n'</span>, <span class="keyword">...</span>
+   inp.assetParam.initPrice*(exp((inp.assetParam.interest-risklessInterest)/2)-1))
+[expValMC,outMC] = meanMC_g(@(n) returnValue(StockMC,n,cutoff,risklessInterest), <span class="keyword">...</span>
+   absTol,relTol);
+fprintf(1,<span class="string">'The expected discounted return if cuts losses is $%6.4f, which seems smaller\n'</span>, <span class="keyword">...</span>
+   expValMC - inp.assetParam.initPrice)
+fprintf(1,<span class="string">'   This required %10.0f Monte Carlo samples and %6.3f seconds\n'</span>, <span class="keyword">...</span>
+   outMC.ntot, outMC.time)
+fprintf(1,<span class="string">'      for a tolerance of %6.4f\n'</span>, <span class="keyword">...</span>
+   absTol)
+</pre><h2>Using Sobol' Sampling to Get the Answer Quicker<a name="4"></a></h2><p>This time we do the same calculation but using <tt>cubSobol_g</tt>.  First we need a new class</p><pre class="codeinput">StockSobol = assetPath(StockMC); <span class="comment">%make a copy</span>
+StockSobol.inputType = <span class="string">'x'</span>; <span class="comment">%cubSobol uses x values as inputs</span>
+StockSobol.wnParam.sampleKind = <span class="string">'Sobol'</span>; <span class="comment">%change from IID</span>
+StockSobol.bmParam.assembleType = <span class="string">'PCA'</span> <span class="comment">%makes the calculations more efficient</span>
+d = size(StockSobol.timeDim.timeVector,2); <span class="comment">%the dimension of the problem</span>
+absTol = 0.005; <span class="comment">%smaller absolute tolerance</span>
+[expValSobol,outSobol] = cubSobol_g(@(x) returnValue(StockSobol,x,cutoff,risklessInterest), <span class="keyword">...</span>
+   [zeros(1,d); ones(1,d)],<span class="string">'uniform'</span>, absTol, relTol);
+fprintf(1,<span class="string">'The expected discounted return if cuts losses, now using Sobol, is $%6.4f\n'</span>, <span class="keyword">...</span>
+   expValSobol - inp.assetParam.initPrice)
+fprintf(1,<span class="string">'   This required %10.0f Sobol samples and %6.3f seconds,\n'</span>, <span class="keyword">...</span>
+   outSobol.n, outSobol.time)
+fprintf(1,<span class="string">'      but for a smaller tolerance of only %6.4f\n'</span>, <span class="keyword">...</span>
+   absTol)
+</pre><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% A Trading Strategy
+% This MATLAB script shows how to use (quasi-)Monte Carlo methods with the
+% |assetPath| class to investigate a particular trading strategy.
+
+%%
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters
+
+
+%% Setting Up the AssetPath Object
+% Let \(S(t)\) denote the price of this stock at time \(t\) measured in
+% years.  The geometric Brownian motion model of a stock price says that 
+% 
+% \[ S(t) = S(0) \exp( (r^* - \sigma^2/2) t + \sigma B(t) ), \]
+%
+% where 
+% 
+% * \(S(0)\) is the initial stock price,
+% * \(r^*\) is the _risk-neutral rate_, 
+% * \(\sigma\) is the constant _volatility_, and 
+% * \(B(t)\) is a Brownian motion. 
+%
+% We set up an |assetPath| object with typical values of thes parameters
+
+inp.timeDim.timeVector = 1/52:1/52:1/2; %weekly monitoring for half a year
+inp.assetParam.initPrice = 100; %initial stock price
+inp.assetParam.interest = 0.02; %risk-neutral rate
+inp.assetParam.volatility = 0.5; %volatility
+risklessInterest = 0.01; %interest for putting money in bank
+cutoff = 75; %cutoff where we should sell
+absTol = 0.05; %absolute tolerance 
+relTol = 0; %relative tolerance
+StockMC = assetPath(inp)
+
+%% Cautious Trading Strategy
+% We know that according to the geometric Brownian motion model, the
+% expected stock price after half a year should be \(S(0) \exp(r^*/2)\),
+% which means a return of \(S(0) (\exp(r^*/2)-1)\).  This corresponds to a
+% disounted return of \(S(0) (\exp((r^*-r)/2)-1)\), where \(r\) is the
+% risk-free rate. But suppose that we decide to protect against adverse
+% loss by selling if the stock ever gets below \(\$75\).  Will this affect
+% our expected return?  Let's see.
+%
+% <include>returnValue.m</include>
+
+fprintf(1,'The expected discounted return if one just waits six months is $%6.4f\n', ...
+   inp.assetParam.initPrice*(exp((inp.assetParam.interest-risklessInterest)/2)-1))
+[expValMC,outMC] = meanMC_g(@(n) returnValue(StockMC,n,cutoff,risklessInterest), ...
+   absTol,relTol);
+fprintf(1,'The expected discounted return if cuts losses is $%6.4f, which seems smaller\n', ...
+   expValMC - inp.assetParam.initPrice)
+fprintf(1,'   This required %10.0f Monte Carlo samples and %6.3f seconds\n', ...
+   outMC.ntot, outMC.time)
+fprintf(1,'      for a tolerance of %6.4f\n', ...
+   absTol)
+
+%% Using Sobol' Sampling to Get the Answer Quicker
+% This time we do the same calculation but using |cubSobol_g|.  First we
+% need a new class
+
+StockSobol = assetPath(StockMC); %make a copy
+StockSobol.inputType = 'x'; %cubSobol uses x values as inputs
+StockSobol.wnParam.sampleKind = 'Sobol'; %change from IID
+StockSobol.bmParam.assembleType = 'PCA' %makes the calculations more efficient
+d = size(StockSobol.timeDim.timeVector,2); %the dimension of the problem
+absTol = 0.005; %smaller absolute tolerance
+[expValSobol,outSobol] = cubSobol_g(@(x) returnValue(StockSobol,x,cutoff,risklessInterest), ...
+   [zeros(1,d); ones(1,d)],'uniform', absTol, relTol);
+fprintf(1,'The expected discounted return if cuts losses, now using Sobol, is $%6.4f\n', ...
+   expValSobol - inp.assetParam.initPrice)
+fprintf(1,'   This required %10.0f Sobol samples and %6.3f seconds,\n', ...
+   outSobol.n, outSobol.time)
+fprintf(1,'      but for a smaller tolerance of only %6.4f\n', ...
+   absTol)
+
+
+%%
+%
+% _Author: Fred J. Hickernell_
+
+##### SOURCE END #####
+--></body></html>

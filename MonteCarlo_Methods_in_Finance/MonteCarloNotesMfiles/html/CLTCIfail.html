@@ -1,0 +1,208 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>CLT-Based Confidence Intervals Can Fail</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="CLTCIfail.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>CLT-Based Confidence Intervals Can Fail</h1><!--introduction--><p>In many cases, one can successfully use the Central Limit Theorem (CLT) to compute a confidence interval or to build an automatic Monte Carlo algorithm.  See <tt>OptionPricingMeanMC_CLT</tt> for an example.  However, an analysis based on the CLT is heuristic, not rigorous.  This example points to how CLT based confidence intervals might fail.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">The test case</a></li><li><a href="#4">Set up parameters</a></li><li><a href="#5">Run the simulation for a nice \(p\)</a></li><li><a href="#7">Run the simulation again for a bad \(p\)</a></li><li><a href="#8">Display results</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> CLTCIfail <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeDisplay <span class="comment">%initialize the display parameters</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeDisplay".
+Error in CLTCIfail (line 11)
+gail.InitializeDisplay %initialize the display parameters</pre><h2>The test case<a name="3"></a></h2><p>Consider the case of \(Y = X^p\) where \(X \sim \mathcal{U}(0,1)\).  Then we can compute that</p><p>\begin{gather*} \mu = \int_0^1 x^p \, {\rm d} x  = \frac{1}{p+1}, \qquad \text{provided } p &gt; -1, \\ \mathbb{E}(Y^2) = \int_0^1 x^{2p} \, {\rm d} x  = \frac{1}{2p+1}, \qquad \text{provided } p &gt; -1/2, \\ \text{var}(Y) = \mathbb{E}(Y^2) - \mu^2  = \frac{p^2}{(2p+1)(p+1)^2}, \qquad \text{provided } p &gt; -1/2. \end{gather*}</p><h2>Set up parameters<a name="4"></a></h2><p>Now we try using <tt>meanMC_CLT</tt> on this test case</p><pre class="codeinput">absTol = 0.01; <span class="comment">%error tolerance</span>
+alpha = 0.01; <span class="comment">%uncertainty</span>
+Ntry = 5000; <span class="comment">%number of trials</span>
+Y=@(n,p) rand(n,1).^p; <span class="comment">%Y=X^p where X is standard uniform</span>
+mu = @(p) 1/(p+1); <span class="comment">%true answer</span>
+muhat(Ntry,1) = 0; <span class="comment">%initialize</span>
+</pre><h2>Run the simulation for a nice \(p\)<a name="5"></a></h2><pre class="codeinput">p = 0.4; <span class="comment">%should be &gt;-1 for mu to be finite, and &gt;-0.5 for var(Y) to be finite</span>
+tic
+<span class="keyword">for</span> j = 1:Ntry <span class="comment">%perform Monte Carlo Ntry times</span>
+    [muhat(j),out]=meanMC_CLT(@(n) Y(n,p),absTol,0,alpha); <span class="comment">%estimated mu using CLT confidence intervals</span>
+<span class="keyword">end</span>
+err = abs(mu(p)-muhat); <span class="comment">%compute true error</span>
+fail = mean(err&gt;absTol); <span class="comment">%proportion of failures to meet tolerance</span>
+toc <span class="comment">%compute elapsed time</span>
+disp([<span class="string">'For Y = X.^'</span> num2str(p)])
+disp(<span class="string">'   with X distributed uniformly on [0, 1]'</span>)
+disp([<span class="string">'For an uncertainty = '</span> num2str(100*alpha) <span class="string">'%'</span> ])
+disp([<span class="string">'            nsigma = '</span> int2str(out.nSig)])
+disp([<span class="string">'  inflation factor = '</span> num2str(out.CM.inflate)])
+disp([<span class="string">'         tolerance = '</span> num2str(absTol)])
+disp([<span class="string">'         true mean = '</span> num2str(mu(p))])
+disp(<span class="string">'The CLT-based confidence interval'</span>)
+disp([<span class="string">'   fails '</span> num2str(100*fail) <span class="string">'% of the time '</span> <span class="keyword">...</span>
+   <span class="string">'for '</span> num2str(Ntry) <span class="string">' trials'</span>])
+disp(<span class="string">' '</span>)
+</pre><p>This case works pretty well.</p><h2>Run the simulation again for a bad \(p\)<a name="7"></a></h2><pre class="codeinput">p = -0.4; <span class="comment">%should be &gt;-1 for mu to be finite, and &gt;-0.5 for var(Y) to be finite</span>
+tic
+<span class="keyword">for</span> j = 1:Ntry <span class="comment">%perform Monte Carlo Ntry times</span>
+    [muhat(j),out]=meanMC_CLT(@(n) Y(n,p),absTol,0,alpha); <span class="comment">%estimated mu using CLT confidence intervals</span>
+<span class="keyword">end</span>
+err = abs(mu(p)-muhat); <span class="comment">%compute true error</span>
+fail = mean(err&gt;absTol); <span class="comment">%proportion of failures to meet tolerance</span>
+toc <span class="comment">%compute elapsed time</span>
+</pre><h2>Display results<a name="8"></a></h2><pre class="codeinput">disp([<span class="string">'For Y = X.^'</span> num2str(p)])
+disp(<span class="string">'   with X distributed uniformly on [0, 1]'</span>)
+disp([<span class="string">'            nsigma = '</span> int2str(out.nSig)])
+disp([<span class="string">'  inflation factor = '</span> num2str(out.CM.inflate)])
+disp([<span class="string">'         tolerance = '</span> num2str(absTol)])
+disp([<span class="string">'         true mean = '</span> num2str(mu(p))])
+disp(<span class="string">'The CLT-based confidence interval'</span>)
+disp([<span class="string">'   fails '</span> num2str(100*fail) <span class="string">'% of the time '</span> <span class="keyword">...</span>
+   <span class="string">'for '</span> num2str(Ntry) <span class="string">' trials'</span>])
+</pre><p>In this case the algorithm fails more than 1% of the time because the variance estimates are not accurate.  One can check that the variance of the variance is infinite.</p><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% CLT-Based Confidence Intervals Can Fail
+% In many cases, one can successfully use the Central Limit Theorem (CLT)
+% to compute a confidence interval or to build an automatic Monte Carlo
+% algorithm.  See |OptionPricingMeanMC_CLT| for an example.  However, an
+% analysis based on the CLT is heuristic, not rigorous.  This example
+% points to how CLT based confidence intervals might fail.
+
+%%
+
+function CLTCIfail %make it a function to not overwrite other variables
+gail.InitializeDisplay %initialize the display parameters
+
+%% The test case
+% Consider the case of \(Y = X^p\) where \(X \sim \mathcal{U}(0,1)\).  Then
+% we can compute that 
+%
+% \begin{gather*}
+% \mu = \int_0^1 x^p \, {\rm d} x  = \frac{1}{p+1}, \qquad \text{provided }
+% p > -1, \\
+% \mathbb{E}(Y^2) = \int_0^1 x^{2p} \, {\rm d} x  = \frac{1}{2p+1}, \qquad \text{provided }
+% p > -1/2, \\
+% \text{var}(Y) = \mathbb{E}(Y^2) - \mu^2  = \frac{p^2}{(2p+1)(p+1)^2}, \qquad \text{provided }
+% p > -1/2.
+% \end{gather*}
+
+%% Set up parameters
+% Now we try using |meanMC_CLT| on this test case
+
+absTol = 0.01; %error tolerance
+alpha = 0.01; %uncertainty
+Ntry = 5000; %number of trials
+Y=@(n,p) rand(n,1).^p; %Y=X^p where X is standard uniform
+mu = @(p) 1/(p+1); %true answer
+muhat(Ntry,1) = 0; %initialize
+
+%% Run the simulation for a nice \(p\)
+p = 0.4; %should be >-1 for mu to be finite, and >-0.5 for var(Y) to be finite
+tic
+for j = 1:Ntry %perform Monte Carlo Ntry times
+    [muhat(j),out]=meanMC_CLT(@(n) Y(n,p),absTol,0,alpha); %estimated mu using CLT confidence intervals
+end
+err = abs(mu(p)-muhat); %compute true error
+fail = mean(err>absTol); %proportion of failures to meet tolerance
+toc %compute elapsed time
+disp(['For Y = X.^' num2str(p)])
+disp('   with X distributed uniformly on [0, 1]')
+disp(['For an uncertainty = ' num2str(100*alpha) '%' ])
+disp(['            nsigma = ' int2str(out.nSig)])
+disp(['  inflation factor = ' num2str(out.CM.inflate)])
+disp(['         tolerance = ' num2str(absTol)])
+disp(['         true mean = ' num2str(mu(p))])
+disp('The CLT-based confidence interval')
+disp(['   fails ' num2str(100*fail) '% of the time ' ...
+   'for ' num2str(Ntry) ' trials'])
+disp(' ')
+
+%%
+% This case works pretty well.
+
+%% Run the simulation again for a bad \(p\)
+p = -0.4; %should be >-1 for mu to be finite, and >-0.5 for var(Y) to be finite
+tic
+for j = 1:Ntry %perform Monte Carlo Ntry times
+    [muhat(j),out]=meanMC_CLT(@(n) Y(n,p),absTol,0,alpha); %estimated mu using CLT confidence intervals
+end
+err = abs(mu(p)-muhat); %compute true error
+fail = mean(err>absTol); %proportion of failures to meet tolerance
+toc %compute elapsed time
+
+%% Display results
+disp(['For Y = X.^' num2str(p)])
+disp('   with X distributed uniformly on [0, 1]')
+disp(['            nsigma = ' int2str(out.nSig)])
+disp(['  inflation factor = ' num2str(out.CM.inflate)])
+disp(['         tolerance = ' num2str(absTol)])
+disp(['         true mean = ' num2str(mu(p))])
+disp('The CLT-based confidence interval')
+disp(['   fails ' num2str(100*fail) '% of the time ' ...
+   'for ' num2str(Ntry) ' trials'])
+
+%%
+% In this case the algorithm fails more than 1% of the time because the
+% variance estimates are not accurate.  One can check that the variance of
+% the variance is infinite.
+%
+% _Author: Fred J. Hickernell_
+
+
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,223 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>The Nagel-Schreckenberg Traffic Model</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="NagelSchreckenbergTraffic.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>The Nagel-Schreckenberg Traffic Model</h1><!--introduction--><p>This example comes from Art Owen's lecture notes on Monte Carlo methods in <a href="http://statweb.stanford.edu/~owen/mc/">http://statweb.stanford.edu/~owen/mc/</a>.  Vehicles circulate on a track. Their speeding up and slowing down is determined by a random process.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Parameters for this Simulation</a></li><li><a href="#6">Time stepping updates of position</a></li><li><a href="#7">Display results</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> NagelSchreckenbergTraffic <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeDisplay <span class="comment">%initialize the display parameters</span>
+set(0,<span class="string">'defaultLineMarkerSize'</span>,3) <span class="comment">%small dots</span>
+tstart=tic; <span class="comment">%start timer</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeDisplay".
+Error in NagelSchreckenbergTraffic (line 10)
+gail.InitializeDisplay %initialize the display parameters</pre><h2>Parameters for this Simulation<a name="3"></a></h2><p>There are \(N\) vehicles circulating on a track with \(M\) spaces, where \(M \ge N\).  The track is circular or oval so that there are no boundary conditions to worry about.  The vehicles travel at a maximum speed of \(v_{\max}\) spaces per unit time.  This model steps forward in increments of one time step.  Vehicles try to speed up one unit if there is room in front, while maintaining the speed limit.  Vehicles slow down one unit at random with probability \(p\).</p><pre class="codeinput">N=100; <span class="comment">%number of vehicles on the track</span>
+M=1000; <span class="comment">%number of spaces on the track, who</span>
+vmax=5; <span class="comment">%speed limit</span>
+p=2/3; <span class="comment">%probability of slowing</span>
+</pre><p>To mitigate the effect of initial conditions, we run the simulation for \(T_0\) time steps before paying attention.  Then we run the simulation for another \(T\) time steps.</p><pre class="codeinput">T0=2500; <span class="comment">%number of burn in time steps</span>
+T=5000; <span class="comment">%number of time steps to be observed</span>
+Tall=T0+T; <span class="comment">%total number of time steps</span>
+flowmax=M*vmax; <span class="comment">%maximum flow of vehicles during the time observed</span>
+</pre><p>We first initialize the variable used to record the positions of all vehicle at all times.  This pre-allocation of memory saves execution time.  We also initalize the variable used to record the velocities of all vehicle.</p><pre class="codeinput">x=zeros(Tall+1,N); <span class="comment">%initialize vehicle locations</span>
+v=zeros(1,N); <span class="comment">%initialize velocity to zero</span>
+<span class="comment">%v=ceil(vmax*rand(1,N)); %initialize velocity randomly</span>
+x0=randperm(M); <span class="comment">%initial placement of vehicles at random positions</span>
+x(1,:)=sort(x0(1:N)); <span class="comment">%then sorted in order</span>
+</pre><h2>Time stepping updates of position<a name="6"></a></h2><p>At each time step we go through a process of computiong the new velocity of each vehicle.  This is done in several stages.  We attempt to</p><div><ul><li>speed up each vehicle if it is going slower than the speed limit,</li><li>making sure that it does not hit the vehicle in front, and</li><li>and slow down each vehicle with IID randomly with a fixed probability.</li></ul></div><p>Then we update the position of each vehicle.</p><pre class="codeinput"><span class="keyword">for</span> i=1:Tall
+    d=mod([diff(x(i,:)) x(i,1)-x(i,N)],M); <span class="comment">%update distances between vehicles</span>
+    v=min(v+1,vmax); <span class="comment">%speed up by one if below the speed limit</span>
+    v=min(v,d-1); <span class="comment">%but do not bump into the vehicle in front</span>
+    slowdown=rand(1,N)&lt;p; <span class="comment">%which vehicles slow down</span>
+    v(slowdown)=max(0,v(slowdown)-1); <span class="comment">%slow these down</span>
+    x(i+1,:)=x(i,:)+v; <span class="comment">%update position of vehicles</span>
+<span class="keyword">end</span>
+avgvelocity=sum(x(Tall+1,:)-x(T0+1,:))/(N*T); <span class="comment">%Average velocity of all vehicles</span>
+</pre><h2>Display results<a name="7"></a></h2><p>Finally we display some summary statistics of the simulated traffic flow. Notice that there are places where the vehicles jam up, and these traffic jams propagate backwards in time.  Notice that the time for the graphical display take much longer than the time for the actual calculation.</p><pre class="codeinput">disp([<span class="string">'Time for simulation = '</span> num2str(toc(tstart)) <span class="string">' seconds'</span>])
+disp([<span class="string">'After '</span> int2str(T0) <span class="string">' steps of burn in,'</span>])
+disp([<span class="string">'     we use the next '</span> int2str(T) <span class="string">' steps to compute the behavior.'</span>])
+disp([<span class="string">'Average velocity of '</span> num2str(N) <span class="string">' vehicles = '</span> num2str(avgvelocity)])
+disp([<span class="string">'     which is '</span> num2str(100*avgvelocity/vmax) <span class="keyword">...</span>
+    <span class="string">'% of the maximum velocity of '</span> num2str(vmax)])
+disp([<span class="string">'Flux = '</span> num2str(avgvelocity*N) <span class="string">' vehicles per unit time'</span>])
+disp([<span class="string">'     which is '</span> num2str(100*avgvelocity*N/flowmax) <span class="keyword">...</span>
+    <span class="string">'% of the maximum flux of '</span> num2str(flowmax)])
+
+tstart=tic; <span class="comment">%start timer</span>
+figure
+plotT=min(T,1000);
+plot(mod(x(T0+1+(0:plotT),:),M),repmat((0:plotT)',1,N),<span class="string">'b.'</span>)
+xlabel(<span class="string">'Position'</span>)
+ylabel(<span class="string">'Time'</span>)
+set(gcf,<span class="string">'Position'</span>,[680 558 840 630])
+print <span class="string">-depsc</span> <span class="string">NSTraffic.eps</span>
+disp([<span class="string">'Time for the graphical display = '</span> num2str(toc(tstart)) <span class="string">' seconds'</span>])
+</pre><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% The Nagel-Schreckenberg Traffic Model
+% This example comes from Art Owen's lecture notes on Monte Carlo methods
+% in <http://statweb.stanford.edu/~owen/mc/>.  Vehicles circulate on a
+% track. Their speeding up and slowing down is determined by a random
+% process.
+
+%%
+
+function NagelSchreckenbergTraffic %make it a function to not overwrite other variables
+gail.InitializeDisplay %initialize the display parameters
+set(0,'defaultLineMarkerSize',3) %small dots
+tstart=tic; %start timer
+
+%% Parameters for this Simulation
+% There are \(N\) vehicles circulating on a track with \(M\) spaces, where
+% \(M \ge N\).  The track is circular or oval so that there are no boundary
+% conditions to worry about.  The vehicles travel at a maximum speed of
+% \(v_{\max}\) spaces per unit time.  This model steps forward in
+% increments of one time step.  Vehicles try to speed up one unit if there
+% is room in front, while maintaining the speed limit.  Vehicles slow down
+% one unit at random with probability \(p\).
+
+N=100; %number of vehicles on the track
+M=1000; %number of spaces on the track, who
+vmax=5; %speed limit
+p=2/3; %probability of slowing
+
+%%
+% To mitigate the effect of initial conditions, we run the simulation for
+% \(T_0\) time steps before paying attention.  Then we run the simulation
+% for another \(T\) time steps.
+
+T0=2500; %number of burn in time steps
+T=5000; %number of time steps to be observed
+Tall=T0+T; %total number of time steps
+flowmax=M*vmax; %maximum flow of vehicles during the time observed
+
+%%
+% We first initialize the variable used to record the positions of all
+% vehicle at all times.  This pre-allocation of memory saves execution
+% time.  We also initalize the variable used to record the velocities of
+% all vehicle.
+
+x=zeros(Tall+1,N); %initialize vehicle locations
+v=zeros(1,N); %initialize velocity to zero
+%v=ceil(vmax*rand(1,N)); %initialize velocity randomly
+x0=randperm(M); %initial placement of vehicles at random positions
+x(1,:)=sort(x0(1:N)); %then sorted in order
+
+%% Time stepping updates of position
+% At each time step we go through a process of computiong the new velocity
+% of each vehicle.  This is done in several stages.  We attempt to
+%
+% * speed up each vehicle if it is going slower than the speed limit,
+% * making sure that it does not hit the vehicle in front, and
+% * and slow down each vehicle with IID randomly with a fixed probability.
+% 
+% Then we update the position of each vehicle.
+
+for i=1:Tall
+    d=mod([diff(x(i,:)) x(i,1)-x(i,N)],M); %update distances between vehicles
+    v=min(v+1,vmax); %speed up by one if below the speed limit
+    v=min(v,d-1); %but do not bump into the vehicle in front
+    slowdown=rand(1,N)<p; %which vehicles slow down
+    v(slowdown)=max(0,v(slowdown)-1); %slow these down
+    x(i+1,:)=x(i,:)+v; %update position of vehicles
+end
+avgvelocity=sum(x(Tall+1,:)-x(T0+1,:))/(N*T); %Average velocity of all vehicles
+
+%% Display results
+% Finally we display some summary statistics of the simulated traffic flow.
+% Notice that there are places where the vehicles jam up, and these traffic
+% jams propagate backwards in time.  Notice that the time for the graphical
+% display take much longer than the time for the actual calculation.
+
+disp(['Time for simulation = ' num2str(toc(tstart)) ' seconds'])
+disp(['After ' int2str(T0) ' steps of burn in,'])
+disp(['     we use the next ' int2str(T) ' steps to compute the behavior.'])
+disp(['Average velocity of ' num2str(N) ' vehicles = ' num2str(avgvelocity)])
+disp(['     which is ' num2str(100*avgvelocity/vmax) ...
+    '% of the maximum velocity of ' num2str(vmax)])
+disp(['Flux = ' num2str(avgvelocity*N) ' vehicles per unit time'])
+disp(['     which is ' num2str(100*avgvelocity*N/flowmax) ...
+    '% of the maximum flux of ' num2str(flowmax)])
+
+tstart=tic; %start timer
+figure
+plotT=min(T,1000);
+plot(mod(x(T0+1+(0:plotT),:),M),repmat((0:plotT)',1,N),'b.')
+xlabel('Position')
+ylabel('Time')
+set(gcf,'Position',[680 558 840 630])
+print -depsc NSTraffic.eps
+disp(['Time for the graphical display = ' num2str(toc(tstart)) ' seconds'])
+
+%%
+% _Author: Fred J. Hickernell_
+
+
+    
+    
+
+
+
+##### SOURCE END #####
+--></body></html>

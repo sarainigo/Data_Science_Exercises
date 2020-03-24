@@ -1,0 +1,281 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Monte Carlo Option Pricing Example Using GAIL</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="OptionPricingMeanMC_g.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Monte Carlo Option Pricing Example Using GAIL</h1><!--introduction--><p>This MATLAB script shows how to use the Guaranteed Automatic Integration Library (GAIL) to perform Monte Carlo option pricing.  The solution has a more rigorous foundation than CLT confidence intervals. See <tt>OptionPricingExample</tt> for some of the background of this example for the background of the problem.  See <tt>OptionPricingMeanMC_CLT</tt> for the solution using CLT confidence intervals.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Initialize Parameters</a></li><li><a href="#4">Computing the European call option price to a desired accuracy</a></li><li><a href="#7">Greater Capabilities in GAIL</a></li><li><a href="#11">Teaser of the future</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> OptionPricingMeanMC_g <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeDisplay <span class="comment">%initialize the display parameters</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeDisplay".
+Error in OptionPricingMeanMC_g (line 11)
+gail.InitializeDisplay %initialize the display parameters</pre><h2>Initialize Parameters<a name="3"></a></h2><p>Rather than calibrate the model from scratch, we use the parameters given.</p><pre class="codeinput">S0 = 537.36; <span class="comment">%initial stock price</span>
+timeFinal = 1/2; <span class="comment">%half year to expiry</span>
+interest = 0.0050238; <span class="comment">%interest</span>
+volatility = 0.19654; <span class="comment">% volatility</span>
+SVal = @(n) S0*exp((interest - volatility.^2/2)*timeFinal <span class="keyword">...</span><span class="comment"> %the time varying part</span>
+   + volatility * sqrt(timeFinal) * randn(n,1)); <span class="comment">%randn produces Gaussian random numbers</span>
+K = 600; <span class="comment">%strike price</span>
+euroCallPayoff = @(n) max(SVal(n) - K, 0) * exp(-interest * timeFinal); <span class="comment">%discounted payoffs</span>
+trueEuroCallPrice = S0 * normcdf((log(S0/K) <span class="keyword">...</span>
+   + (interest + volatility.^2/2)*timeFinal)/(volatility * sqrt(timeFinal))) <span class="keyword">...</span>
+   - K * exp(-interest * timeFinal) * normcdf((log(S0/K) <span class="keyword">...</span>
+   + (interest - volatility.^2/2)*timeFinal)/(volatility * sqrt(timeFinal)))
+</pre><h2>Computing the European call option price to a desired accuracy<a name="4"></a></h2><p>First we use the Central Limit Theorem confidence interval approach:</p><pre class="codeinput">absTol = 0.05;
+relTol = 0;
+[euroCallPrice,out] = meanMC_CLT(euroCallPayoff,absTol,relTol);
+disp([<span class="string">'The approximate European call price = '</span> <span class="keyword">...</span>
+   num2str(euroCallPrice,<span class="string">'%6.3f'</span>) <span class="string">' +/- '</span> num2str(absTol,<span class="string">'%4.3f'</span>) ])
+disp([<span class="string">'   based on '</span> num2str(out.nSample) <span class="string">' samples and '</span> <span class="keyword">...</span>
+   num2str(out.time,<span class="string">'%4.4f'</span>) <span class="string">' seconds'</span>])
+</pre><p>Next we use the guaranteed confidence interval</p><pre class="codeinput">[euroCallPrice,out] = meanMC_g(euroCallPayoff,absTol,relTol,0.01,1.2,1e5)
+disp([<span class="string">'The approximate European call price = '</span> <span class="keyword">...</span>
+   num2str(euroCallPrice,<span class="string">'%6.3f'</span>) <span class="string">' +/- '</span> num2str(absTol,<span class="string">'%4.3f'</span>) ])
+disp([<span class="string">'   based on '</span> num2str(out.ntot) <span class="string">' samples and '</span> <span class="keyword">...</span>
+   num2str(out.time,<span class="string">'%4.4f'</span>) <span class="string">' seconds'</span>])
+<span class="keyword">return</span>
+</pre><p>The time is a somewhat more for <tt>meanMC_g</tt> because more samples are required, but the answer comes with a sounder justification.</p><h2>Greater Capabilities in GAIL<a name="7"></a></h2><p>GAIL also includes some classes defined to facilitate option pricing. Let's set up some input parameters</p><pre class="codeinput">inp.timeDim.timeVector = timeFinal; <span class="comment">%just one time step</span>
+inp.wnParam.xDistrib = <span class="string">'Gaussian'</span>; <span class="comment">%use randn</span>
+inp.assetParam.initPrice = S0; <span class="comment">%initial stock price</span>
+inp.assetParam.interest = interest; <span class="comment">%interest rate</span>
+inp.assetParam.volatility = volatility; <span class="comment">%volatility</span>
+inp.payoffParam.strike = K; <span class="comment">%strike price</span>
+inp.priceParam.absTol = absTol; <span class="comment">%absolute tolerance criterion</span>
+</pre><p>Next we use the class constructor <tt>optPrice</tt> to create an instance of an the <tt>optPrice</tt> class with the input parameters specified and the other parameters kept as the defaults</p><pre class="codeinput">euroCallPriceObject = optPrice(inp)
+</pre><p>Note all the properties of this object.  Here we have the exact price already, but in case we do not, we can use IID Monte Carlo with our guaranteed confidence intervals to get the price to the accuracy specified.</p><pre class="codeinput">[euroCallPriceGAIL,out] = genOptPrice(euroCallPriceObject);
+disp(<span class="string">'Using the GAIL optPrice class,'</span>)
+disp([<span class="string">'   the approximate European call price = '</span> <span class="keyword">...</span>
+   num2str(euroCallPriceGAIL,<span class="string">'%6.3f'</span>) <span class="string">' +/ '</span> num2str(absTol,<span class="string">'%4.3f'</span>) ])
+disp([<span class="string">'   based on '</span> num2str(out.nPaths) <span class="string">' samples and '</span> <span class="keyword">...</span>
+   num2str(out.time,<span class="string">'%4.4f'</span>) <span class="string">' seconds'</span>])
+</pre><p>Unfortunately, this is much slower, but it is convenient.</p><h2>Teaser of the future<a name="11"></a></h2><p>Peeking ahead, one can try a faster Monte Carlo method, called Sobol' sampling:</p><pre class="codeinput">euroCallPriceObject.priceParam.cubMethod = <span class="string">'Sobol'</span>
+[euroCallPriceGAIL,out] = genOptPrice(euroCallPriceObject);
+disp(<span class="string">'Using the GAIL optPrice class with Sobol sampling,'</span>)
+disp([<span class="string">'   the approximate European call price = '</span> <span class="keyword">...</span>
+   num2str(euroCallPriceGAIL,<span class="string">'%6.3f'</span>) <span class="string">' +/- '</span> num2str(absTol,<span class="string">'%4.3f'</span>) ])
+disp([<span class="string">'   based on '</span> num2str(out.nPaths) <span class="string">' samples and '</span> <span class="keyword">...</span>
+   num2str(out.time,<span class="string">'%4.4f'</span>) <span class="string">' seconds'</span>])
+</pre><p>You may need to run this program a couple of times to attain the possible speed, but this is a big speed up.</p><p>We may even change this to become a <i>lookback put</i> option. Now each stock price path is 125 steps long and the discounted payoff is</p><p>\[ \Bigl [\max_{0 \le t \le T} S(t) - S(T) \Bigr] \mathrm{e}^{-rT}.\]</p><p>The maximum stock price acts like the strike price.</p><pre class="codeinput">lookbackPutPriceObject = euroCallPriceObject; <span class="comment">%copy the European price object</span>
+lookbackPutPriceObject.timeDim.timeVector = 1/250:1/250:0.5; <span class="comment">%daily monitoring</span>
+lookbackPutPriceObject.bmParam.assembleType = {<span class="string">'PCA'</span>}; <span class="keyword">...</span><span class="comment"> %PCA construction of Brownian motion</span>
+lookbackPutPriceObject.payoffParam.optType = {<span class="string">'look'</span>}; <span class="keyword">...</span><span class="comment"> %lookback option</span>
+lookbackPutPriceObject.payoffParam.putCallType = {<span class="string">'put'</span>} <span class="comment">%put option</span>
+[lookbackPutPriceGAIL,out] = genOptPrice(lookbackPutPriceObject);
+disp(<span class="string">'Using the GAIL optPrice class with Sobol sampling,'</span>)
+disp([<span class="string">'   the approximate lookback put price = '</span> <span class="keyword">...</span>
+   num2str(lookbackPutPriceGAIL,<span class="string">'%6.3f'</span>) <span class="string">' +/- '</span> num2str(absTol,<span class="string">'%4.3f'</span>) ])
+disp([<span class="string">'   based on '</span> num2str(out.nPaths) <span class="string">' samples and '</span> <span class="keyword">...</span>
+   num2str(out.time,<span class="string">'%4.4f'</span>) <span class="string">' seconds'</span>])
+</pre><p>With Sobol' sampling this is fast, but with IID Monte Carlo sampling, it is slow because many more paths are needed</p><pre class="codeinput">lookbackPutPriceObject.priceParam.cubMethod = <span class="string">'IID_MC'</span>;
+lookbackPutPriceObject.inputType = <span class="string">'n'</span>;
+lookbackPutPriceObject.wnParam.xDistrib = <span class="string">'Gaussian'</span>
+[lookbackPutPriceGAIL,out] = genOptPrice(lookbackPutPriceObject);
+disp(<span class="string">'Using the GAIL optPrice class with IID sampling,'</span>)
+disp([<span class="string">'   the approximate lookback put price = '</span> <span class="keyword">...</span>
+   num2str(lookbackPutPriceGAIL,<span class="string">'%6.3f'</span>) <span class="string">' +/- '</span> num2str(absTol,<span class="string">'%4.3f'</span>) ])
+disp([<span class="string">'   based on '</span> num2str(out.nPaths) <span class="string">' samples and '</span> <span class="keyword">...</span>
+   num2str(out.time,<span class="string">'%4.4f'</span>) <span class="string">' seconds'</span>])
+</pre><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Monte Carlo Option Pricing Example Using GAIL
+% This MATLAB script shows how to use the Guaranteed Automatic Integration
+% Library (GAIL) to perform Monte Carlo option pricing.  The solution has a
+% more rigorous foundation than CLT confidence intervals. See
+% |OptionPricingExample| for some of the background of this example for the
+% background of the problem.  See |OptionPricingMeanMC_CLT| for the
+% solution using CLT confidence intervals.
+
+%%
+function OptionPricingMeanMC_g %make it a function to not overwrite other variables
+gail.InitializeDisplay %initialize the display parameters
+
+%% Initialize Parameters
+% Rather than calibrate the model from scratch, we use the parameters
+% given. 
+S0 = 537.36; %initial stock price
+timeFinal = 1/2; %half year to expiry
+interest = 0.0050238; %interest
+volatility = 0.19654; % volatility
+SVal = @(n) S0*exp((interest - volatility.^2/2)*timeFinal ... %the time varying part
+   + volatility * sqrt(timeFinal) * randn(n,1)); %randn produces Gaussian random numbers
+K = 600; %strike price
+euroCallPayoff = @(n) max(SVal(n) - K, 0) * exp(-interest * timeFinal); %discounted payoffs
+trueEuroCallPrice = S0 * normcdf((log(S0/K) ...
+   + (interest + volatility.^2/2)*timeFinal)/(volatility * sqrt(timeFinal))) ...
+   - K * exp(-interest * timeFinal) * normcdf((log(S0/K) ...
+   + (interest - volatility.^2/2)*timeFinal)/(volatility * sqrt(timeFinal)))
+
+%% Computing the European call option price to a desired accuracy
+% First we use the Central Limit Theorem confidence interval approach:
+
+absTol = 0.05;
+relTol = 0;
+[euroCallPrice,out] = meanMC_CLT(euroCallPayoff,absTol,relTol);
+disp(['The approximate European call price = ' ...
+   num2str(euroCallPrice,'%6.3f') ' +/- ' num2str(absTol,'%4.3f') ])
+disp(['   based on ' num2str(out.nSample) ' samples and ' ...
+   num2str(out.time,'%4.4f') ' seconds'])
+
+%%
+% Next we use the guaranteed confidence interval 
+[euroCallPrice,out] = meanMC_g(euroCallPayoff,absTol,relTol,0.01,1.2,1e5)
+disp(['The approximate European call price = ' ...
+   num2str(euroCallPrice,'%6.3f') ' +/- ' num2str(absTol,'%4.3f') ])
+disp(['   based on ' num2str(out.ntot) ' samples and ' ...
+   num2str(out.time,'%4.4f') ' seconds'])
+return
+
+%%
+% The time is a somewhat more for |meanMC_g| because more samples are
+% required, but the answer comes with a sounder justification.
+
+%% Greater Capabilities in GAIL
+% GAIL also includes some classes defined to facilitate option pricing.
+% Let's set up some input parameters
+
+inp.timeDim.timeVector = timeFinal; %just one time step
+inp.wnParam.xDistrib = 'Gaussian'; %use randn
+inp.assetParam.initPrice = S0; %initial stock price
+inp.assetParam.interest = interest; %interest rate
+inp.assetParam.volatility = volatility; %volatility
+inp.payoffParam.strike = K; %strike price
+inp.priceParam.absTol = absTol; %absolute tolerance criterion
+
+%%
+% Next we use the class constructor |optPrice| to create an instance of an
+% the |optPrice| class with the input parameters specified and the other
+% parameters kept as the defaults 
+
+euroCallPriceObject = optPrice(inp)
+
+%%
+% Note all the properties of this object.  Here we have the exact price
+% already, but in case we do not, we can use IID Monte Carlo with our
+% guaranteed confidence intervals to get the price to the accuracy
+% specified.
+
+[euroCallPriceGAIL,out] = genOptPrice(euroCallPriceObject);
+disp('Using the GAIL optPrice class,')
+disp(['   the approximate European call price = ' ...
+   num2str(euroCallPriceGAIL,'%6.3f') ' +/ ' num2str(absTol,'%4.3f') ])
+disp(['   based on ' num2str(out.nPaths) ' samples and ' ...
+   num2str(out.time,'%4.4f') ' seconds'])
+
+%%
+% Unfortunately, this is much slower, but it is convenient.
+%
+%% Teaser of the future
+% Peeking ahead, one can try a faster Monte Carlo method, called Sobol'
+% sampling:
+
+euroCallPriceObject.priceParam.cubMethod = 'Sobol'
+[euroCallPriceGAIL,out] = genOptPrice(euroCallPriceObject);
+disp('Using the GAIL optPrice class with Sobol sampling,')
+disp(['   the approximate European call price = ' ...
+   num2str(euroCallPriceGAIL,'%6.3f') ' +/- ' num2str(absTol,'%4.3f') ])
+disp(['   based on ' num2str(out.nPaths) ' samples and ' ...
+   num2str(out.time,'%4.4f') ' seconds'])
+
+%%
+% You may need to run this program a couple of times to attain the possible
+% speed, but this is a big speed up.
+%
+% We may even change this to become a _lookback put_ option. Now each stock
+% price path is 125 steps long and the discounted payoff is
+%
+% \[ \Bigl [\max_{0 \le t \le T} S(t) - S(T) \Bigr] \mathrm{e}^{-rT}.\]
+%
+% The maximum stock price acts like the strike price.
+
+lookbackPutPriceObject = euroCallPriceObject; %copy the European price object
+lookbackPutPriceObject.timeDim.timeVector = 1/250:1/250:0.5; %daily monitoring
+lookbackPutPriceObject.bmParam.assembleType = {'PCA'}; ... %PCA construction of Brownian motion
+lookbackPutPriceObject.payoffParam.optType = {'look'}; ... %lookback option
+lookbackPutPriceObject.payoffParam.putCallType = {'put'} %put option
+[lookbackPutPriceGAIL,out] = genOptPrice(lookbackPutPriceObject);
+disp('Using the GAIL optPrice class with Sobol sampling,')
+disp(['   the approximate lookback put price = ' ...
+   num2str(lookbackPutPriceGAIL,'%6.3f') ' +/- ' num2str(absTol,'%4.3f') ])
+disp(['   based on ' num2str(out.nPaths) ' samples and ' ...
+   num2str(out.time,'%4.4f') ' seconds'])
+
+%% 
+% With Sobol' sampling this is fast, but with IID Monte Carlo sampling, it
+% is slow because many more paths are needed
+
+lookbackPutPriceObject.priceParam.cubMethod = 'IID_MC';
+lookbackPutPriceObject.inputType = 'n';
+lookbackPutPriceObject.wnParam.xDistrib = 'Gaussian'
+[lookbackPutPriceGAIL,out] = genOptPrice(lookbackPutPriceObject);
+disp('Using the GAIL optPrice class with IID sampling,')
+disp(['   the approximate lookback put price = ' ...
+   num2str(lookbackPutPriceGAIL,'%6.3f') ' +/- ' num2str(absTol,'%4.3f') ])
+disp(['   based on ' num2str(out.nPaths) ' samples and ' ...
+   num2str(out.time,'%4.4f') ' seconds'])
+
+%%
+% _Author: Fred J. Hickernell_
+
+##### SOURCE END #####
+--></body></html>

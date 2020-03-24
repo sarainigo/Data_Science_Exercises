@@ -1,0 +1,352 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Sandwich Shop Simulation</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="SandwichShopSimulation.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Sandwich Shop Simulation</h1><!--introduction--><p>Here we look at the case of a restaurant modeling its operations.  We can see how the different parameter settings affect the average profit.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Initializing the workspace and setting the display parameters</a></li><li><a href="#3">Sandwich Shop Parameters</a></li><li><a href="#4">Perform simulation</a></li><li><a href="#5">Output results</a></li><li><a href="#6">Saving sandwiches</a></li><li><a href="#7">Comparing Profits for Different Orders and Wholesale Costs</a></li></ul></div><h2>Initializing the workspace and setting the display parameters<a name="1"></a></h2><p>These settings clean up the workspace and make the display beautiful.</p><pre class="codeinput"><span class="keyword">function</span> SandwichShopSimulation <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeWorkspaceDisplay <span class="comment">%initialize the workspace and the display parameters</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeWorkspaceDisplay".
+Error in SandwichShopSimulation (line 9)
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters</pre><h2>Sandwich Shop Parameters<a name="3"></a></h2><p>A sandwich shop orders \(O\) sandwiches each day at a fixed price of \(W\) dollars.  They sell them at a price of \(R\) dollars.  The demand for sandwiches, \(D\), is a random variable that is \(\mathcal{U}\{5, 6, \ldots, 35\}\).  How much profit will be made on average?</p><p>We may simulate \(n\) replications of \(m\) consecutive days:</p><pre class="codeinput">tic;
+whole = 4; <span class="comment">%wholesale price of sandwich</span>
+retail = 5; <span class="comment">%retail price of sandwich</span>
+order = 10; <span class="comment">%quantity of sandwiches ordered daily</span>
+demandlo = 5; <span class="comment">%lo end of demand</span>
+demandhi = 35; <span class="comment">%hi end of demand</span>
+ndays = 3*365; <span class="comment">%number of days for simulation</span>
+ndvec = (1:ndays)'; <span class="comment">%vector of 1 to number of days</span>
+nreps = 10000; <span class="comment">%number of replications</span>
+nrvec = (1:nreps)'; <span class="comment">%number of replications of the simulation</span>
+</pre><h2>Perform simulation<a name="4"></a></h2><p>The number of sandwiches sold, \(S\), is the minimum of the demand, and the number ordered, i.e.,</p><p>\[ S = \min(D,O). \]</p><p>The profit, \(P\) each day is the difference between the income and the expense:</p><p>\[ P = S \times R - O \times W \]</p><p>In our case we are computing \(P_{ij}\) for \(i=1, \ldots, n\) and \(j = 1, \ldots, m\).  Then we compute the average profit of \(m\) days for each run \(i\).</p><pre class="codeinput">demand = randi([demandlo,demandhi],nreps,ndays); <span class="comment">%uniform random numbers for demand</span>
+sold = min(demand,order); <span class="comment">%amount of sandwiches sold that day</span>
+dayprofit = sold*retail-order*whole; <span class="comment">%profit for the day</span>
+avgprofitrun = mean(dayprofit,2); <span class="comment">%average profit for the first m days</span>
+avgprofit = mean(avgprofitrun); <span class="comment">%average profit over all runs and days</span>
+toc
+</pre><h2>Output results<a name="5"></a></h2><p>We output the results of our simulation.  Notice how the sample average converges as the number of replications increases.</p><pre class="codeinput"><span class="comment">%Numerical output</span>
+disp([<span class="string">'For '</span> int2str(nreps) <span class="string">' replications of'</span>])
+disp([<span class="string">'    '</span> int2str(ndays) <span class="string">' days of business'</span>])
+disp([<span class="string">'    sandwiches costing $'</span> num2str(whole,<span class="string">' %6.2f'</span>) <span class="string">' apiece'</span>])
+disp([<span class="string">'    and sold for $'</span> num2str(retail,<span class="string">' %6.2f'</span>) <span class="string">' apiece'</span>])
+disp([<span class="string">'For a supply of '</span> int2str(order) <span class="string">' sandwiches ordered daily'</span>])
+disp(<span class="string">'and a random demand that is uniform over a range of'</span>)
+disp([<span class="string">'   {'</span> int2str(demandlo) <span class="string">',...,'</span> <span class="keyword">...</span>
+    int2str(demandhi), <span class="string">'} sandwiches'</span>])
+disp([<span class="string">'The average daily profit over this whole time = $'</span> <span class="keyword">...</span>
+    num2str(avgprofit,<span class="string">' %6.2f'</span>)])
+disp([<span class="string">'   compared to the maximum possible profit of $'</span> <span class="keyword">...</span>
+    num2str(order*(retail-whole),<span class="string">' %6.2f'</span>)])
+disp(<span class="string">' '</span>);
+
+<span class="comment">%Plot daily and cumulative average profit</span>
+semilogx((1:nreps)',cumsum(avgprofitrun)./(1:nreps)',<span class="string">'-'</span>);
+set(gca,<span class="string">'xtick'</span>,10.^(0:ceil(log10(nreps))));
+xlabel(<span class="string">'Number of Replications'</span>); ylabel(<span class="string">'Avg Daily Profit'</span>)
+</pre><h2>Saving sandwiches<a name="6"></a></h2><p>In the above example, the daily profits are independent random variables. Suppose that we consider the case where sandwiches may be saved for one day, and we sell the old sandwiches first.  Then the daily profits are <i>dependent</i> random variables. The formulas change as follows</p><p>\begin{gather*} S_{i1} = \min(D_{ij},O), \quad S_{ij} = \min(D_{ij},O + R_{i,j-1}), \qquad j = 2, 3, \ldots, m \\ R_{ij} = O + \min(R_{i,j-1} - S_{ij},0) = \begin{cases} O, &amp; S_{ij} \le R_{i,j-1}, \\ O + R_{i,j-1} -  S_{ij}, &amp; S_{ij} &gt; R_{i,j-1}, \end{cases} \qquad j = 1, 2, \ldots, m. \end{gather*}</p><p>The modified simulation is as follows</p><pre class="codeinput">sold(:,1) = min(demand(:,1),order); <span class="comment">%sandwiches sold the first day, none leftover from the day before</span>
+remain(:,1) = order - sold(:,1); <span class="comment">%sandwiches leftover</span>
+<span class="keyword">for</span> j = 2:ndays
+   sold(:,j) = min(demand(:,j),order + remain(:,j-1)); <span class="comment">%amount of sandwiches sold that day</span>
+   remain(:,j) = order + min(remain(:,j-1) - sold(:,j),0); <span class="comment">%cannot keep sandwiches more than one day</span>
+<span class="keyword">end</span>
+dayprofit=sold*retail-order*whole; <span class="comment">%profit for the day</span>
+avgprofitrun=mean(dayprofit,2); <span class="comment">%average profit for the first m days</span>
+avgprofit=mean(avgprofitrun); <span class="comment">%average profit over all runs and days</span>
+toc
+
+<span class="comment">%Numerical output</span>
+disp([<span class="string">'For '</span> int2str(nreps) <span class="string">' replications of'</span>])
+disp([<span class="string">'    '</span> int2str(ndays) <span class="string">' days of business'</span>])
+disp([<span class="string">'    sandwiches costing $'</span> num2str(whole,<span class="string">' %6.2f'</span>) <span class="string">' apiece'</span>])
+disp([<span class="string">'    and sold for $'</span> num2str(retail,<span class="string">' %6.2f'</span>) <span class="string">' apiece'</span>])
+disp(<span class="string">'Sandwiches can be kept for tomorrow.'</span>)
+disp([<span class="string">'For a supply of '</span> int2str(order) <span class="string">' sandwiches ordered daily'</span>])
+disp(<span class="string">'and a random demand that is uniform over a range of'</span>)
+disp([<span class="string">'   {'</span> int2str(demandlo) <span class="string">',...,'</span> <span class="keyword">...</span>
+    int2str(demandhi), <span class="string">'} sandwiches'</span>])
+disp([<span class="string">'The average daily profit over this whole time = $'</span> <span class="keyword">...</span>
+    num2str(avgprofit,<span class="string">' %6.2f'</span>)])
+disp([<span class="string">'   compared to the maximum possible profit of $'</span> <span class="keyword">...</span>
+    num2str(order*(retail-whole),<span class="string">' %6.2f'</span>)])
+disp(<span class="string">' '</span>);
+
+<span class="comment">%Plot daily and cumulative average profit</span>
+semilogx((1:nreps)',cumsum(avgprofitrun)./(1:nreps)',<span class="string">'-'</span>);
+set(gca,<span class="string">'xtick'</span>,10.^(0:ceil(log10(nreps))));
+xlabel(<span class="string">'Number of Replications'</span>); ylabel(<span class="string">'Avg Daily Profit'</span>)
+</pre><h2>Comparing Profits for Different Orders and Wholesale Costs<a name="7"></a></h2><p>Finally, let's run the simulation for a variety of parameters:</p><pre class="codeinput">Ovec = 5:5:35; <span class="comment">%vector of possible order sizes</span>
+nO = numel(Ovec); <span class="comment">%number of possible order sizes</span>
+Wvec = 1:4; <span class="comment">%vector of possible wholseale prices</span>
+nW = numel(Wvec); <span class="comment">%number of possible wholesale prices</span>
+demand = randi([demandlo,demandhi],nreps,ndays); <span class="comment">%uniform random numbers for demand</span>
+avgprofitThrowAway = zeros(nO,nW);
+avgprofitKeep = avgprofitThrowAway;
+<span class="keyword">for</span> ii = 1:nO
+   order = Ovec(ii);
+   <span class="keyword">for</span> jj = 1:nW
+      whole = Wvec(jj);
+      <span class="comment">% First the simulation where we throw away unsold sandwiches</span>
+      soldThrowAway = min(demand,order); <span class="comment">%amount of sandwiches sold that day</span>
+      avgprofitThrowAway(ii,jj) = mean(mean(soldThrowAway*retail-order*whole)); <span class="comment">%avg daily profit</span>
+
+      <span class="comment">% Next the simulation where we keep unsold sandwiches one day</span>
+      soldKeep(:,1) = min(demand(:,1),order); <span class="comment">%sandwiches sold the first day, none leftover from the day before</span>
+      remain(:,1) = order - soldKeep(:,1); <span class="comment">%sandwiches leftover</span>
+      <span class="keyword">for</span> j = 2:ndays
+         soldKeep(:,j) = min(demand(:,j),order + remain(:,j-1)); <span class="comment">%amount of sandwiches sold that day</span>
+         remain(:,j) = order + min(remain(:,j-1) - soldKeep(:,j),0); <span class="comment">%cannot keep sandwiches more than one day</span>
+      <span class="keyword">end</span>
+      avgprofitKeep(ii,jj) = mean(mean(soldKeep*retail-order*whole)); <span class="comment">%avg daily profit</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p>Now we display the output</p><pre class="codeinput">disp(<span class="string">'Avg Daily Profit | Order Quantity'</span>)
+fprintf(<span class="string">' Wholesale Price |'</span>)
+fprintf(<span class="string">' %5.0f   '</span>,Ovec)
+fprintf(<span class="string">'\n'</span>)
+<span class="keyword">for</span> jj = 1:nW
+   fprintf(<span class="string">'Throw Away $%4.2f | '</span>,Wvec(jj))
+   fprintf(<span class="string">'$%6.2f  '</span>,avgprofitThrowAway(:,jj))
+   fprintf(<span class="string">'\n'</span>)
+   fprintf(<span class="string">'Keep       $%4.2f | '</span>,Wvec(jj))
+   fprintf(<span class="string">'$%6.2f  '</span>,avgprofitKeep(:,jj))
+   fprintf(<span class="string">'\n'</span>)
+<span class="keyword">end</span>
+</pre><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Sandwich Shop Simulation
+% Here we look at the case of a restaurant modeling its operations.  We can
+% see how the different parameter settings affect the average profit.
+
+%% Initializing the workspace and setting the display parameters
+% These settings clean up the workspace and make the display beautiful.
+
+function SandwichShopSimulation %make it a function to not overwrite other variables
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters
+
+%% Sandwich Shop Parameters
+% A sandwich shop orders \(O\) sandwiches each day at a fixed price of
+% \(W\) dollars.  They sell them at a price of \(R\) dollars.  The demand
+% for sandwiches, \(D\), is a random variable that is \(\mathcal{U}\{5, 6,
+% \ldots, 35\}\).  How much profit will be made on average?
+%
+% We may simulate \(n\) replications of \(m\) consecutive days:
+
+tic;
+whole = 4; %wholesale price of sandwich
+retail = 5; %retail price of sandwich
+order = 10; %quantity of sandwiches ordered daily
+demandlo = 5; %lo end of demand
+demandhi = 35; %hi end of demand
+ndays = 3*365; %number of days for simulation
+ndvec = (1:ndays)'; %vector of 1 to number of days
+nreps = 10000; %number of replications
+nrvec = (1:nreps)'; %number of replications of the simulation
+
+%% Perform simulation
+% The number of sandwiches sold, \(S\), is the minimum of the demand, and
+% the number ordered, i.e., 
+%
+% \[
+% S = \min(D,O).
+% \]
+%
+% The profit, \(P\) each day is the difference between the income and the expense:
+% 
+% \[
+% P = S \times R - O \times W
+% \]
+%
+% In our case we are computing \(P_{ij}\) for \(i=1, \ldots, n\) and \(j =
+% 1, \ldots, m\).  Then we compute the average profit of \(m\) days for
+% each run \(i\).
+
+demand = randi([demandlo,demandhi],nreps,ndays); %uniform random numbers for demand
+sold = min(demand,order); %amount of sandwiches sold that day
+dayprofit = sold*retail-order*whole; %profit for the day
+avgprofitrun = mean(dayprofit,2); %average profit for the first m days
+avgprofit = mean(avgprofitrun); %average profit over all runs and days
+toc
+
+%% Output results
+% We output the results of our simulation.  Notice how the sample average
+% converges as the number of replications increases.
+%Numerical output
+disp(['For ' int2str(nreps) ' replications of'])
+disp(['    ' int2str(ndays) ' days of business'])
+disp(['    sandwiches costing $' num2str(whole,' %6.2f') ' apiece'])
+disp(['    and sold for $' num2str(retail,' %6.2f') ' apiece'])
+disp(['For a supply of ' int2str(order) ' sandwiches ordered daily'])
+disp('and a random demand that is uniform over a range of')
+disp(['   {' int2str(demandlo) ',...,' ...
+    int2str(demandhi), '} sandwiches'])
+disp(['The average daily profit over this whole time = $' ...
+    num2str(avgprofit,' %6.2f')])
+disp(['   compared to the maximum possible profit of $' ...
+    num2str(order*(retail-whole),' %6.2f')])
+disp(' ');
+
+%Plot daily and cumulative average profit
+semilogx((1:nreps)',cumsum(avgprofitrun)./(1:nreps)','-');
+set(gca,'xtick',10.^(0:ceil(log10(nreps))));
+xlabel('Number of Replications'); ylabel('Avg Daily Profit')
+
+%% Saving sandwiches
+% In the above example, the daily profits are independent random variables.
+% Suppose that we consider the case where sandwiches may be saved for one
+% day, and we sell the old sandwiches first.  Then the daily profits are
+% _dependent_ random variables. The formulas change as follows 
+%
+% \begin{gather*}
+% S_{i1} = \min(D_{ij},O), \quad
+% S_{ij} = \min(D_{ij},O + R_{i,j-1}), \qquad j = 2, 3, \ldots, m \\
+% R_{ij} = O + \min(R_{i,j-1} - S_{ij},0) = \begin{cases}
+% O, & S_{ij} \le R_{i,j-1}, \\ O + R_{i,j-1} -  S_{ij}, 
+% & S_{ij} > R_{i,j-1}, \end{cases} \qquad j = 1, 2, \ldots, m.
+% \end{gather*}
+%
+% The modified simulation is as follows
+
+sold(:,1) = min(demand(:,1),order); %sandwiches sold the first day, none leftover from the day before
+remain(:,1) = order - sold(:,1); %sandwiches leftover
+for j = 2:ndays
+   sold(:,j) = min(demand(:,j),order + remain(:,j-1)); %amount of sandwiches sold that day
+   remain(:,j) = order + min(remain(:,j-1) - sold(:,j),0); %cannot keep sandwiches more than one day
+end
+dayprofit=sold*retail-order*whole; %profit for the day
+avgprofitrun=mean(dayprofit,2); %average profit for the first m days
+avgprofit=mean(avgprofitrun); %average profit over all runs and days
+toc
+
+%Numerical output
+disp(['For ' int2str(nreps) ' replications of'])
+disp(['    ' int2str(ndays) ' days of business'])
+disp(['    sandwiches costing $' num2str(whole,' %6.2f') ' apiece'])
+disp(['    and sold for $' num2str(retail,' %6.2f') ' apiece'])
+disp('Sandwiches can be kept for tomorrow.')
+disp(['For a supply of ' int2str(order) ' sandwiches ordered daily'])
+disp('and a random demand that is uniform over a range of')
+disp(['   {' int2str(demandlo) ',...,' ...
+    int2str(demandhi), '} sandwiches'])
+disp(['The average daily profit over this whole time = $' ...
+    num2str(avgprofit,' %6.2f')])
+disp(['   compared to the maximum possible profit of $' ...
+    num2str(order*(retail-whole),' %6.2f')])
+disp(' ');
+
+%Plot daily and cumulative average profit
+semilogx((1:nreps)',cumsum(avgprofitrun)./(1:nreps)','-');
+set(gca,'xtick',10.^(0:ceil(log10(nreps))));
+xlabel('Number of Replications'); ylabel('Avg Daily Profit')
+
+%% Comparing Profits for Different Orders and Wholesale Costs
+% Finally, let's run the simulation for a variety of parameters:
+Ovec = 5:5:35; %vector of possible order sizes
+nO = numel(Ovec); %number of possible order sizes
+Wvec = 1:4; %vector of possible wholseale prices
+nW = numel(Wvec); %number of possible wholesale prices
+demand = randi([demandlo,demandhi],nreps,ndays); %uniform random numbers for demand
+avgprofitThrowAway = zeros(nO,nW);
+avgprofitKeep = avgprofitThrowAway;
+for ii = 1:nO
+   order = Ovec(ii);
+   for jj = 1:nW
+      whole = Wvec(jj);
+      % First the simulation where we throw away unsold sandwiches
+      soldThrowAway = min(demand,order); %amount of sandwiches sold that day
+      avgprofitThrowAway(ii,jj) = mean(mean(soldThrowAway*retail-order*whole)); %avg daily profit
+ 
+      % Next the simulation where we keep unsold sandwiches one day
+      soldKeep(:,1) = min(demand(:,1),order); %sandwiches sold the first day, none leftover from the day before
+      remain(:,1) = order - soldKeep(:,1); %sandwiches leftover
+      for j = 2:ndays
+         soldKeep(:,j) = min(demand(:,j),order + remain(:,j-1)); %amount of sandwiches sold that day
+         remain(:,j) = order + min(remain(:,j-1) - soldKeep(:,j),0); %cannot keep sandwiches more than one day
+      end
+      avgprofitKeep(ii,jj) = mean(mean(soldKeep*retail-order*whole)); %avg daily profit
+   end
+end
+
+%%
+% Now we display the output
+disp('Avg Daily Profit | Order Quantity')
+fprintf(' Wholesale Price |')
+fprintf(' %5.0f   ',Ovec)
+fprintf('\n')
+for jj = 1:nW
+   fprintf('Throw Away $%4.2f | ',Wvec(jj))
+   fprintf('$%6.2f  ',avgprofitThrowAway(:,jj))
+   fprintf('\n')
+   fprintf('Keep       $%4.2f | ',Wvec(jj))
+   fprintf('$%6.2f  ',avgprofitKeep(:,jj))
+   fprintf('\n')
+end
+
+%%
+% _Author: Fred J. Hickernell_
+
+
+    
+##### SOURCE END #####
+--></body></html>

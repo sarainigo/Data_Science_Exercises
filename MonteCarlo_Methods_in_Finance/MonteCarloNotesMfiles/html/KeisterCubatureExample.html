@@ -1,0 +1,328 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Keister's Example of Multidimensional Integration</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="KeisterCubatureExample.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Keister's Example of Multidimensional Integration</h1><!--introduction--><p>B. D. Keister, Multidimensional quadrature algorithms, <i>Computers in Physics</i>, <b>10</b>, pp. 119-122, 1996, presents the following multidimensional integral, inspired by a physics application:</p><p>\[ \mu = \int_{\mathbb{R}^d} \cos(\lVert \boldsymbol{t} \rVert) \exp(-\lVert \boldsymbol{t} \rVert^2) \, \mathrm{d} \boldsymbol{t}, \qquad d = 1, 2, \ldots. \]</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Expressing the integral as an expectation</a></li><li><a href="#2">Evaluating the integral using <tt>meanMC_g</tt></a></li><li><a href="#5">Checking the real error</a></li><li><a href="#7">Choosing different values of \(a\)</a></li><li><a href="#8">Choosing all values of \(a\)</a></li><li><a href="#11">Lattice cubature</a></li><li><a href="#13">Sobol cubature</a></li></ul></div><h2>Expressing the integral as an expectation<a name="1"></a></h2><p>Let's evaluate the integral using Monte Carlo cubature.  We first note that the change of variable \(\boldsymbol{t} = a \boldsymbol{x}\) transforms this integral into</p><p>\begin{align*} \mu &amp;= \int_{\mathbb{R}^d} \cos(a \lVert \boldsymbol{x} \rVert) \exp(-a^2 \lVert \boldsymbol{x} \rVert^2) \, a^d \, \mathrm{d} \boldsymbol{x}, \qquad a &gt; 0, \\ &amp; = \int_{\mathbb{R}^d} \underbrace{(2\pi a^2)^{d/2} \cos(a \lVert \boldsymbol{x} \rVert) \exp((1/2-a^2) \lVert \boldsymbol{x} \rVert^2)}_{f(\boldsymbol{x})} \times \underbrace{\frac{\exp(-\lVert \boldsymbol{x} \rVert^2/2)} {(2\pi)^{d/2}}}_{\varrho(\boldsymbol{x})} \, \mathrm{d} \boldsymbol{x} \\ &amp; = \mathbb{E}[f(\boldsymbol{X})], \qquad \text{where } \boldsymbol{X} \sim \mathcal{N}(\boldsymbol{0}, \mathsf{I}). \end{align*}</p><h2>Evaluating the integral using <tt>meanMC_g</tt><a name="2"></a></h2><p>To find \(\mu\) by Monte Carlo methods we define an anonymous function \(f\) as follows:</p><pre class="codeinput"><span class="keyword">function</span> KeisterCubatureExample <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeDisplay <span class="comment">%initialize the display parameters</span>
+normsqd = @(t) sum(t.*t,2); <span class="comment">%squared l_2 norm of t</span>
+f1 = @(normt,a,d) ((2*pi*a^2).^(d/2)) * cos(a*sqrt(normt)) <span class="keyword">...</span>
+   .* exp((1/2-a^2)*normt);
+f = @(t,a,d) f1(normsqd(t),a,d);
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeDisplay".
+Error in KeisterCubatureExample (line 32)
+gail.InitializeDisplay %initialize the display parameters</pre><p>Next we call <tt>meanMC_g</tt></p><pre class="codeinput">abstol = 0; <span class="comment">%absolute error tolerance</span>
+reltol = 0.01; <span class="comment">%relative error tolerance</span>
+dvec = 1:5; <span class="comment">%vector of dimensions</span>
+a = 1 <span class="comment">%default value of a</span>
+IMCvec = zeros(size(dvec)); <span class="comment">%vector of answers</span>
+tic
+<span class="keyword">for</span> d = dvec
+   IMCvec(d) = meanMC_g(@(n) f(randn(n,d),a,d),abstol,reltol); <span class="comment">%compute the integral for different d</span>
+<span class="keyword">end</span>
+toc
+IMCvec
+</pre><h2>Checking the real error<a name="5"></a></h2><p>There is a way to get the value of this integral to machine precision using the function <tt>Keistertrue</tt></p><pre class="language-matlab">
+<span class="keyword">function</span> [I,Ivec] = Keistertrue(dvec)
+<span class="comment">%KEISTERTRUE computes the true value of the Keister integral in dimension d</span>
+<span class="comment">%  accuracy might degrade as d increases due to round-off error</span>
+dmax = max(dvec);
+cosinteg=zeros(1,dmax);
+cosinteg(1)=sqrt(pi)/(2*exp(1/4));
+sininteg=zeros(1,dmax);
+<span class="comment">%sininteg(1)=integral(@(x) exp(-x.*x).*sin(x),0,inf);</span>
+sininteg(1)=4.244363835020225e-01;
+cosinteg(2)=(1-sininteg(1))/2;
+sininteg(2)=cosinteg(1)/2;
+<span class="keyword">for</span> j=3:dmax
+   cosinteg(j)=((j-2)*cosinteg(j-2)-sininteg(j-1))/2;
+   sininteg(j)=((j-2)*sininteg(j-2)+cosinteg(j-1))/2;
+<span class="keyword">end</span>
+dMaxVec=1:dmax;
+Ivec=(2*(pi.^(dMaxVec/2))./gamma(dMaxVec/2)).*cosinteg;
+I=Ivec(dvec);
+<span class="keyword">end</span>
+
+
+</pre><pre class="codeinput">[~,Ivec] = Keistertrue(dvec(end));
+relErrMC = abs(Ivec-IMCvec)./abs(Ivec)
+</pre><p>All values are within the requested error tolerance.</p><h2>Choosing different values of \(a\)<a name="7"></a></h2><p>The value of the integral does not depend on the value of the parameter \(a\), but the time required may. Let's try two other values:</p><pre class="codeinput">a = sqrt(1/2) <span class="comment">%a smaller value of a</span>
+tic
+<span class="keyword">for</span> d = dvec
+   IMCvec(d) = meanMC_g(@(n) f(randn(n,d),a,d),abstol,reltol); <span class="comment">%compute the integral for different d</span>
+<span class="keyword">end</span>
+toc
+IMCvec
+relErrMC = abs(Ivec-IMCvec)./abs(Ivec)
+
+a = 1.2 <span class="comment">%a larger value of a</span>
+tic
+<span class="keyword">for</span> d = dvec
+   IMCvec(d) = meanMC_g(@(n) f(randn(n,d),a,d),abstol,reltol); <span class="comment">%compute the integral for different d</span>
+<span class="keyword">end</span>
+toc
+IMCvec
+relErrMC = abs(Ivec-IMCvec)./abs(Ivec)
+</pre><h2>Choosing all values of \(a\)<a name="8"></a></h2><p>The algorithm <tt>meanMC_CLT</tt> has the option for you to provide several random variables with the same mean.  The sample means from these several random variables are then weighted to provide an approximation to their common mean.</p><p>First we try with three different values of \(a\)</p><pre class="codeinput">d = 4; <span class="comment">%a typical value</span>
+avec = [1/sqrt(2) 1 1.2]; <span class="comment">%three different choices of a</span>
+tic
+IMCsmallA = meanMC_CLT(@(n) f(randn(n,d),avec(1),d),abstol,reltol)
+toc
+tic
+IMCmedA = meanMC_CLT(@(n) f(randn(n,d),avec(2),d),abstol,reltol)
+toc
+tic
+IMClargeA = meanMC_CLT(@(n) f(randn(n,d),avec(3),d),abstol,reltol)
+toc
+</pre><p>Next we try with all values of \(a\)</p><pre class="codeinput">fAllA = @(t) [f(t,avec(1),d) f(t,avec(2),d) f(t,avec(3),d)];
+tic
+IMCAllA = meanMC_CLT(<span class="string">'Y'</span>, @(n) fAllA(randn(n,d)), <span class="string">'nY'</span>,3, <span class="keyword">...</span>
+   <span class="string">'absTol'</span>, abstol, <span class="string">'relTol'</span>,reltol)
+toc
+</pre><p>The time is worse than for the best choice of \(a\), but better than for the worst choice of \(a\).  It is like an insurance policy.  <tt>meanMC_g</tt> does not yet have this capability, but it should be added.</p><h2>Lattice cubature<a name="11"></a></h2><p>We may sample the integrand using the nodeset of a rank-1 integration lattice to approximate this integral.</p><pre class="codeinput">a = 1; <span class="comment">%default value of a again</span>
+ILatticevec = zeros(size(dvec)); <span class="comment">%vector of answers</span>
+tic
+<span class="keyword">for</span> d = dvec
+   ILatticevec(d) = cubLattice_g(@(x) f(x,a,d),[-inf(1,d); inf(1,d)], <span class="keyword">...</span>
+      <span class="string">'normal'</span>,abstol,reltol);
+<span class="keyword">end</span>
+toc
+ILatticevec
+relErrLattice = abs(Ivec-ILatticevec)./abs(Ivec)
+</pre><p>We see that the the relative error using the lattice rule is still within tolerance, but the time required is much less.</p><h2>Sobol cubature<a name="13"></a></h2><p>We may use the Sobol' cubature to approximate this integral.</p><pre class="codeinput">a = 1; <span class="comment">%default value of a again</span>
+ISobolvec = zeros(size(dvec)); <span class="comment">%vector of answers</span>
+tic
+<span class="keyword">for</span> d = dvec
+   ISobolvec(d) = cubSobol_g(@(x) f(x,a,d),[-inf(1,d); inf(1,d)], <span class="keyword">...</span>
+      <span class="string">'normal'</span>,abstol,reltol);
+<span class="keyword">end</span>
+toc
+ISobolvec
+relErrSobol = abs(Ivec-ISobolvec)./abs(Ivec)
+</pre><p>Again, the relative error using the Sobol' rule is within tolerance, but the time required is much less.</p><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Keister's Example of Multidimensional Integration
+% 
+% B. D. Keister, Multidimensional quadrature algorithms, _Computers in
+% Physics_, *10*, pp. 119-122, 1996, presents the following
+% multidimensional integral, inspired by a physics application:
+%
+% \[ \mu = \int_{\mathbb{R}^d} \cos(\lVert \boldsymbol{t} \rVert)
+% \exp(-\lVert \boldsymbol{t} \rVert^2) \, \mathrm{d} \boldsymbol{t},
+% \qquad d = 1, 2, \ldots. \]
+
+%% Expressing the integral as an expectation
+% Let's evaluate the integral using Monte Carlo cubature.  We first note
+% that the change of variable \(\boldsymbol{t} = a \boldsymbol{x}\)
+% transforms this integral into
+%
+% \begin{align*} \mu &= \int_{\mathbb{R}^d} \cos(a \lVert \boldsymbol{x}
+% \rVert) \exp(-a^2 \lVert \boldsymbol{x} \rVert^2) \, a^d \, \mathrm{d} 
+% \boldsymbol{x}, \qquad a > 0, \\ & = \int_{\mathbb{R}^d}
+% \underbrace{(2\pi a^2)^{d/2} \cos(a \lVert \boldsymbol{x} \rVert)
+% \exp((1/2-a^2) \lVert \boldsymbol{x} \rVert^2)}_{f(\boldsymbol{x})}
+% \times \underbrace{\frac{\exp(-\lVert \boldsymbol{x} \rVert^2/2)}
+% {(2\pi)^{d/2}}}_{\varrho(\boldsymbol{x})} \, \mathrm{d} \boldsymbol{x} \\
+% & = \mathbb{E}[f(\boldsymbol{X})], \qquad \text{where } \boldsymbol{X}
+% \sim \mathcal{N}(\boldsymbol{0}, \mathsf{I}). \end{align*}
+
+%% Evaluating the integral using |meanMC_g|
+% To find \(\mu\) by Monte Carlo methods we define an anonymous function
+% \(f\) as follows:
+
+function KeisterCubatureExample %make it a function to not overwrite other variables
+
+gail.InitializeDisplay %initialize the display parameters
+normsqd = @(t) sum(t.*t,2); %squared l_2 norm of t
+f1 = @(normt,a,d) ((2*pi*a^2).^(d/2)) * cos(a*sqrt(normt)) ...
+   .* exp((1/2-a^2)*normt);
+f = @(t,a,d) f1(normsqd(t),a,d);
+
+%%
+% Next we call |meanMC_g|
+
+abstol = 0; %absolute error tolerance
+reltol = 0.01; %relative error tolerance
+dvec = 1:5; %vector of dimensions
+a = 1 %default value of a
+IMCvec = zeros(size(dvec)); %vector of answers
+tic
+for d = dvec
+   IMCvec(d) = meanMC_g(@(n) f(randn(n,d),a,d),abstol,reltol); %compute the integral for different d
+end
+toc
+IMCvec
+
+%% Checking the real error
+% There is a way to get the value of this integral to machine precision
+% using the function |Keistertrue|
+%
+% <include>Keistertrue.m</include>
+
+[~,Ivec] = Keistertrue(dvec(end));
+relErrMC = abs(Ivec-IMCvec)./abs(Ivec)
+
+%%
+% All values are within the requested error tolerance.
+
+%% Choosing different values of \(a\)
+% The value of the integral does not depend on the value of the parameter
+% \(a\), but the time required may. Let's try two other values:
+
+a = sqrt(1/2) %a smaller value of a
+tic
+for d = dvec
+   IMCvec(d) = meanMC_g(@(n) f(randn(n,d),a,d),abstol,reltol); %compute the integral for different d
+end
+toc
+IMCvec
+relErrMC = abs(Ivec-IMCvec)./abs(Ivec)
+
+a = 1.2 %a larger value of a
+tic
+for d = dvec
+   IMCvec(d) = meanMC_g(@(n) f(randn(n,d),a,d),abstol,reltol); %compute the integral for different d
+end
+toc
+IMCvec
+relErrMC = abs(Ivec-IMCvec)./abs(Ivec)
+
+%% Choosing all values of \(a\)
+% The algorithm |meanMC_CLT| has the option for you to provide several
+% random variables with the same mean.  The sample means from these several
+% random variables are then weighted to provide an approximation to their
+% common mean.
+%
+% First we try with three different values of \(a\)
+
+d = 4; %a typical value
+avec = [1/sqrt(2) 1 1.2]; %three different choices of a
+tic
+IMCsmallA = meanMC_CLT(@(n) f(randn(n,d),avec(1),d),abstol,reltol)
+toc
+tic
+IMCmedA = meanMC_CLT(@(n) f(randn(n,d),avec(2),d),abstol,reltol)
+toc
+tic
+IMClargeA = meanMC_CLT(@(n) f(randn(n,d),avec(3),d),abstol,reltol)
+toc
+
+%%
+% Next we try with all values of \(a\)
+
+fAllA = @(t) [f(t,avec(1),d) f(t,avec(2),d) f(t,avec(3),d)];
+tic
+IMCAllA = meanMC_CLT('Y', @(n) fAllA(randn(n,d)), 'nY',3, ...
+   'absTol', abstol, 'relTol',reltol)
+toc
+
+%%
+% The time is worse than for the best choice of \(a\), but better than for
+% the worst choice of \(a\).  It is like an insurance policy.  |meanMC_g|
+% does not yet have this capability, but it should be added.
+
+%% Lattice cubature
+% We may sample the integrand using the nodeset of a rank-1 integration
+% lattice to approximate this integral.
+
+a = 1; %default value of a again
+ILatticevec = zeros(size(dvec)); %vector of answers
+tic
+for d = dvec
+   ILatticevec(d) = cubLattice_g(@(x) f(x,a,d),[-inf(1,d); inf(1,d)], ...
+      'normal',abstol,reltol);
+end
+toc
+ILatticevec
+relErrLattice = abs(Ivec-ILatticevec)./abs(Ivec)
+
+%%
+% We see that the the relative error using the lattice rule is still within
+% tolerance, but the time required is much less.
+
+%% Sobol cubature
+% We may use the Sobol' cubature to approximate this integral.
+
+a = 1; %default value of a again
+ISobolvec = zeros(size(dvec)); %vector of answers
+tic
+for d = dvec
+   ISobolvec(d) = cubSobol_g(@(x) f(x,a,d),[-inf(1,d); inf(1,d)], ...
+      'normal',abstol,reltol);
+end
+toc
+ISobolvec
+relErrSobol = abs(Ivec-ISobolvec)./abs(Ivec)
+
+%%
+% Again, the relative error using the Sobol' rule is within tolerance, but
+% the time required is much less.
+%
+% _Author: Fred J. Hickernell_
+
+   
+##### SOURCE END #####
+--></body></html>

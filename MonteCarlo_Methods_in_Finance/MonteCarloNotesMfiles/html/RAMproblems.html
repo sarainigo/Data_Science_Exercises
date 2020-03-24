@@ -1,0 +1,189 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Demonstration of RAM problems</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="RAMproblems.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Demonstration of RAM problems</h1><!--introduction--><p>The time required by a Monte Carlo computation is often proportional to the number of samples required. However, when the size of the variables get too large, then the computation may be slowed way down by the act of writing the variables to the hard drive. This script demonstrates the problems and a potential workaround.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">The mean of the sum of IID \(\mathcal{U}[0,1]\) random variables</a></li><li><a href="#6">A way around RAM problems</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> RAMproblems <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeDisplay <span class="comment">%initialize the display parameters</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeDisplay".
+Error in RAMproblems (line 10)
+gail.InitializeDisplay %initialize the display parameters</pre><h2>The mean of the sum of IID \(\mathcal{U}[0,1]\) random variables<a name="3"></a></h2><p>Let</p><p>\[ Y = X_1 + \cdots + X_d, \quad X_j \overset{\text{IID}}{\sim} \mathcal{U}[0,1]. \]</p><p>and note that \(\mathbb{E}(Y) = d/2\).  We may also calculate this using <tt>meanMC_g</tt></p><pre class="codeinput">abstol = 0.02; <span class="comment">%absolute error tolerance</span>
+reltol = 0; <span class="comment">%relative error tolerance</span>
+d = 30; <span class="comment">%set d value</span>
+[muhat,out] = meanMC_g(@(n) sum(rand(n,d),2),abstol,reltol);
+disp([<span class="string">'The mean = '</span> num2str(muhat,<span class="string">'%7.2f'</span>) <span class="string">' +/- '</span> num2str(abstol,<span class="string">'%3.2f'</span>)])
+disp([<span class="string">'Number of samples required = '</span> int2str(out.ntot)]) <span class="comment">%number of samples required</span>
+disp([<span class="string">'             Time required = '</span> num2str(out.time) <span class="string">'  seconds'</span>]) <span class="comment">%time required</span>
+</pre><p>This problem only requires about \(160\,000\) samples.</p><p>If we increase \(d\) we still get the correct answer</p><pre class="codeinput">d = 300; <span class="comment">%set d value</span>
+[muhat,out] = meanMC_g(@(n) sum(rand(n,d),2),abstol,reltol);
+disp([<span class="string">'The mean = '</span> num2str(muhat,<span class="string">'%7.2f'</span>) <span class="string">' +/- '</span> num2str(abstol,<span class="string">'%3.2f'</span>)])
+disp([<span class="string">'Number of samples required = '</span> int2str(out.ntot)]) <span class="comment">%number of samples required</span>
+disp([<span class="string">'             Time required = '</span> num2str(out.time) <span class="string">'  seconds'</span>]) <span class="comment">%time required</span>
+</pre><p>but now the time required is about \(50\) times a long.  This can be explained by the fact that the number of samples required is about \(5\) times as many and that \(d\) is now \(10\) times as large, so we need \(5 \times 10 = 50\) times as many random numbers to complete the calculation.</p><p>If \(d\) is increased to \(3000\), then we get an error in MATLAB because we are trying to create an \(n \times d\) array in RAM, that is too big. We cannot complete the calculation, and an error message is issued.</p><pre class="codeinput"><span class="keyword">try</span>
+   d = 3000; <span class="comment">%set d value</span>
+   [muhat,out] = meanMC_g(@(n) sum(rand(n,d),2),abstol,reltol);
+<span class="keyword">catch</span> ME
+   disp(getReport(ME))
+<span class="keyword">end</span>
+</pre><h2>A way around RAM problems<a name="6"></a></h2><p>The workaround is to write a function that creates \(m \times d\) arrays of uniform random nubers for \(m\) much smaller than \(n\), and only stores the \(Y_i\).  This involves for loops.</p><pre class="language-matlab">
+<span class="keyword">function</span> Y = sumUnifRand(n,d)
+Y = zeros(n,1); <span class="comment">%initialize Y</span>
+ndmax = 1e7; <span class="comment">%largest number of elements that we allow at a time</span>
+npc = floor(ndmax/d); <span class="comment">%number of samples per piece</span>
+nit = floor(n/npc); <span class="comment">%number of iterations in the for loop</span>
+<span class="keyword">for</span> j = 1:nit
+   Y((j-1)*npc+1:j*npc) = sum(rand(npc,d),2); <span class="comment">%sum of d uniform random variables</span>
+<span class="keyword">end</span>
+nrem = n - nit*npc; <span class="comment">%left overs</span>
+<span class="keyword">if</span> nrem &gt; 0
+   Y(nit*npc+1:n) = sum(rand(nrem,d),2); <span class="comment">%sum of d uniform random variables</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+</pre><pre class="codeinput">d = 3000; <span class="comment">%set d value</span>
+[muhat,out] = meanMC_g(@(n) sumUnifRand(n,d),abstol,reltol);
+disp([<span class="string">'The mean = '</span> num2str(muhat,<span class="string">'%7.2f'</span>) <span class="string">' +/- '</span> num2str(abstol,<span class="string">'%3.2f'</span>)])
+disp([<span class="string">'Number of samples required = '</span> int2str(out.ntot)]) <span class="comment">%number of samples required</span>
+disp([<span class="string">'             Time required = '</span> num2str(out.time) <span class="string">'  seconds'</span>]) <span class="comment">%time required</span>
+</pre><p>Even though the number of samples required overruns the time budget, at least the computation can be completed.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Demonstration of RAM problems
+% The time required by a Monte Carlo computation is often proportional to
+% the number of samples required. However, when the size of the variables
+% get too large, then the computation may be slowed way down by the act of
+% writing the variables to the hard drive. This script demonstrates the
+% problems and a potential workaround.
+
+%%
+function RAMproblems %make it a function to not overwrite other variables
+gail.InitializeDisplay %initialize the display parameters
+
+%% The mean of the sum of IID \(\mathcal{U}[0,1]\) random variables
+% Let
+%
+% \[ Y = X_1 + \cdots + X_d, \quad X_j \overset{\text{IID}}{\sim}
+% \mathcal{U}[0,1]. \]
+%
+% and note that \(\mathbb{E}(Y) = d/2\).  We may also calculate this using
+% |meanMC_g|
+
+abstol = 0.02; %absolute error tolerance
+reltol = 0; %relative error tolerance
+d = 30; %set d value
+[muhat,out] = meanMC_g(@(n) sum(rand(n,d),2),abstol,reltol);
+disp(['The mean = ' num2str(muhat,'%7.2f') ' +/- ' num2str(abstol,'%3.2f')])
+disp(['Number of samples required = ' int2str(out.ntot)]) %number of samples required
+disp(['             Time required = ' num2str(out.time) '  seconds']) %time required
+
+%%
+% This problem only requires about \(160\,000\) samples.
+%
+% If we increase \(d\) we still get the correct answer
+
+d = 300; %set d value
+[muhat,out] = meanMC_g(@(n) sum(rand(n,d),2),abstol,reltol);
+disp(['The mean = ' num2str(muhat,'%7.2f') ' +/- ' num2str(abstol,'%3.2f')])
+disp(['Number of samples required = ' int2str(out.ntot)]) %number of samples required
+disp(['             Time required = ' num2str(out.time) '  seconds']) %time required
+
+%%
+% but now the time required is about \(50\) times a long.  This can be
+% explained by the fact that the number of samples required is about
+% \(5\) times as many and that \(d\) is now \(10\) times as large, so we
+% need \(5 \times 10 = 50\) times as many random numbers to complete the
+% calculation.
+%
+% If \(d\) is increased to \(3000\), then we get an error in MATLAB because
+% we are trying to create an \(n \times d\) array in RAM, that is too big.
+% We cannot complete the calculation, and an error message is issued.
+
+try 
+   d = 3000; %set d value
+   [muhat,out] = meanMC_g(@(n) sum(rand(n,d),2),abstol,reltol);
+catch ME
+   disp(getReport(ME))
+end
+
+
+%% A way around RAM problems
+% The workaround is to write a function that creates \(m \times d\) arrays
+% of uniform random nubers for \(m\) much smaller than \(n\), and only
+% stores the \(Y_i\).  This involves for loops.
+%
+% <include>sumUnifRand.m</include>
+
+d = 3000; %set d value
+[muhat,out] = meanMC_g(@(n) sumUnifRand(n,d),abstol,reltol);
+disp(['The mean = ' num2str(muhat,'%7.2f') ' +/- ' num2str(abstol,'%3.2f')])
+disp(['Number of samples required = ' int2str(out.ntot)]) %number of samples required
+disp(['             Time required = ' num2str(out.time) '  seconds']) %time required
+
+%%
+% Even though the number of samples required overruns the time budget, at
+% least the computation can be completed.
+
+##### SOURCE END #####
+--></body></html>

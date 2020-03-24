@@ -1,0 +1,283 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Introduction to GAIL Option Pricing</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="IntroGAILOptionPricing.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Introduction to GAIL Option Pricing</h1><!--introduction--><p>In <tt>BrownianMotionExample</tt> we saw an example of the <tt>brownianMotion</tt> class, and in <tt>OptionPricingMeanMC_g</tt> we saw a brief introduction to the GAIL classes for option pricing.  This is a more thorough introduction.</p><p>GAIL (the develop branch) has a hierachy of classes</p><div><ul><li><tt>stochProcess</tt> is a <tt>handle</tt> subclass</li><li><tt>whiteNoise</tt> is a subclass of <tt>stochProcess</tt> for generating IID random vectors</li><li><tt>brownianMotion</tt> is a subclass of <tt>whiteNoise</tt> for generating samples of Brownian Motions</li><li><tt>assetPath</tt> is a subclass of <tt>brownianMotion</tt> for generating samples of asset or stock price paths</li><li><tt>optPayoff</tt> is a subclass of <tt>assetPath</tt> for generating samples of payoffs of various kinds of options</li><li><tt>optPrice</tt> is a subclass of <tt>optPayoff</tt> for approximating option prices using Monte Carlo methods</li></ul></div><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1"><tt>assetPath</tt> objects</a></li><li><a href="#5"><tt>optPayoff</tt> objects</a></li><li><a href="#9"><tt>optPrice</tt> objects</a></li></ul></div><h2><tt>assetPath</tt> objects<a name="1"></a></h2><p>In <tt>BrownianMotionExample</tt> we generated a <tt>brownianMotion</tt> object by specifying the time vector.  Here we repeat that, but with a coarser time discretization</p><pre class="codeinput">gail.InitializeWorkspaceDisplay <span class="comment">%initialize the workspace and the display parameters</span>
+inp.timeDim.timeVector = 0.25:0.25:1; <span class="comment">%time increments of 0.004 up to time 1</span>
+ourBrownianMotion = brownianMotion(inp) <span class="comment">%construct a brownianMotion object</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeWorkspaceDisplay".
+Error in IntroGAILOptionPricing (line 25)
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters</pre><p>To generate an asset path modeled by a geometric Brownian motion we need to add some more properties</p><pre class="codeinput">inp.assetParam.initPrice = 120; <span class="comment">%initial stock price</span>
+inp.assetParam.interest = 0.01; <span class="comment">%risk-free interest rate</span>
+inp.assetParam.volatility = 0.5; <span class="comment">%volatility</span>
+ourAssetPath = assetPath(inp) <span class="comment">%construct an assetPath object</span>
+</pre><p>We generate some paths with the <tt>genPaths</tt> method:</p><pre class="codeinput">methods(ourAssetPath)
+n = 10; <span class="comment">%number of paths to generate</span>
+aPaths = genPaths(ourAssetPath,n) <span class="comment">%an n by 250 matrix of numbers</span>
+</pre><p>Next we use the <tt>plot</tt> method to plot some asset paths</p><pre class="codeinput">n = 20; <span class="comment">%number of paths to plot</span>
+plot(ourAssetPath,n) <span class="comment">%plot n paths</span>
+xlabel(<span class="string">'Time'</span>)
+ylabel(<span class="string">'Asset Paths'</span>)
+print <span class="string">-depsc</span> <span class="string">AssetPaths.eps</span>
+</pre><h2><tt>optPayoff</tt> objects<a name="5"></a></h2><p>To generate some discounted option payoffs to add some more properties</p><pre class="codeinput">inp.payoffParam.strike = 130; <span class="comment">%initial stock price</span>
+ourCallPayoff = optPayoff(inp) <span class="comment">%construct an optPayoff object</span>
+</pre><p>Note that the default is a European call option.  We generate some paths with the <tt>genOptPayoffs</tt> method:</p><pre class="codeinput">methods(ourCallPayoff)
+n = 10; <span class="comment">%number of paths to generate</span>
+Payoffs = genOptPayoffs(ourCallPayoff,n) <span class="comment">%an n vector of numbers</span>
+</pre><p>Next we use the <tt>plot</tt> method to plot the empirical distribution function of some option payoffs</p><pre class="codeinput">n = 1e3; <span class="comment">%number of paths to plot</span>
+plot(ourCallPayoff,n) <span class="comment">%plot n paths</span>
+xlabel(<span class="string">'Discounted Payoff'</span>)
+ylabel(<span class="string">'Probability'</span>)
+print <span class="string">-depsc</span> <span class="string">EuropeanCallOptionPayoffs.eps</span>
+</pre><h2><tt>optPrice</tt> objects<a name="9"></a></h2><p>Finally, to automate the pricing of options, we can create <tt>optPrice</tt> objects that use <tt>meanMC_g</tt> to compute the option price by Monte Carlo.</p><pre class="codeinput">inp.priceParam.absTol = 0; <span class="comment">%absolute tolerance</span>
+inp.priceParam.relTol = 0.005; <span class="comment">%one penny on the dollar relative tolerance</span>
+ourCallPrice = optPrice(inp) <span class="comment">%construct an optPrice object</span>
+</pre><p>Note that for this option, the true price is known.</p><p>To compute the option price by Monte Carlo we execute the command</p><pre class="codeinput">[CallPrice, out] = genOptPrice(ourCallPrice) <span class="comment">%the option price</span>
+</pre><p>Note that the price generated by Monte Carlo is within the tolerance of the exact price.</p><p>As noted elsewhere, we do not really need to know the stock price at so many time steps to price a European option.  Thus, we can change the time vector and price it again.</p><pre class="codeinput">ourCallPrice.timeDim.timeVector = 1
+[CallPrice,out] = genOptPrice(ourCallPrice) <span class="comment">%the option price</span>
+</pre><p>The time is now about a quarter of what it was before.</p><p>We can also change to a put option.  First we make a new copy of our <tt>optPrice</tt> object, and then we change the property <tt>payoffParam.putCallType</tt>.</p><pre class="codeinput">ourPutPrice = optPrice(ourCallPrice); <span class="comment">%make a new object with same properties as the call</span>
+ourPutPrice.payoffParam.putCallType = {<span class="string">'put'</span>}
+[PutPrice,out] = genOptPrice(ourPutPrice) <span class="comment">%the option price</span>
+</pre><p>The time to price the put option is less than the time to price the call option.  Do you know why?</p><p>We know that the time recorded tracks the number of samples needed, which in turn is related to the error tolerance as follows:</p><p>\[\text{number of samples needed} = n = \mathcal{O}\biggl( \frac{\text{var}(\text{payoff})}{\text{tolerance}^2} \biggr). \]</p><p>For the the call and put options this factor on the right is as follows:</p><pre class="codeinput">callRHS = var(genOptPayoffs(ourCallPrice,1e4)) <span class="keyword">...</span>
+   /(ourCallPrice.priceParam.relTol*CallPrice)^2
+putRHS = var(genOptPayoffs(ourPutPrice,1e4)) <span class="keyword">...</span>
+   /(ourPutPrice.priceParam.relTol*PutPrice)^2
+</pre><p>We can see that the right hand side for the call is much more than for the put, although not by the factor that we might expect.  This may be due to some of the overhead involved <tt>meanMC_g</tt> using a relative error criterion.  If we use a pure absolute error criterion then the relative times are closer to the ratio of the right hand sides of the formula for \(n\) above.</p><pre class="codeinput">ourCallPrice.priceParam.relTol=0;
+ourCallPrice.priceParam.absTol=0.1
+[CallPrice,out] = genOptPrice(ourCallPrice) <span class="comment">%the option price</span>
+
+ourPutPrice.priceParam.relTol=0;
+ourPutPrice.priceParam.absTol=0.1
+[PutPrice,out] = genOptPrice(ourPutPrice) <span class="comment">%the option price</span>
+
+callRHS = var(genOptPayoffs(ourCallPrice,1e4)) <span class="keyword">...</span>
+   /(ourCallPrice.priceParam.absTol)^2
+putRHS = var(genOptPayoffs(ourPutPrice,1e4)) <span class="keyword">...</span>
+   /(ourPutPrice.priceParam.absTol)^2
+</pre><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Introduction to GAIL Option Pricing
+% In |BrownianMotionExample| we saw an example of the |brownianMotion|
+% class, and in |OptionPricingMeanMC_g| we saw a brief introduction to the
+% GAIL classes for option pricing.  This is a more thorough introduction.
+%
+% GAIL (the develop branch) has a hierachy of classes
+%
+% * |stochProcess| is a |handle| subclass
+% * |whiteNoise| is a subclass of |stochProcess| for generating IID random
+% vectors
+% * |brownianMotion| is a subclass of |whiteNoise| for generating samples of
+% Brownian Motions
+% * |assetPath| is a subclass of |brownianMotion| for generating samples of
+% asset or stock price paths
+% * |optPayoff| is a subclass of |assetPath| for generating samples of
+% payoffs of various kinds of options
+% * |optPrice| is a subclass of |optPayoff| for approximating option prices
+% using Monte Carlo methods
+
+%% |assetPath| objects
+% In |BrownianMotionExample| we generated a |brownianMotion| object by
+% specifying the time vector.  Here we repeat that, but with a coarser time
+% discretization
+
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters
+inp.timeDim.timeVector = 0.25:0.25:1; %time increments of 0.004 up to time 1
+ourBrownianMotion = brownianMotion(inp) %construct a brownianMotion object
+
+%%
+% To generate an asset path modeled by a geometric Brownian motion we need
+% to add some more properties
+
+inp.assetParam.initPrice = 120; %initial stock price
+inp.assetParam.interest = 0.01; %risk-free interest rate
+inp.assetParam.volatility = 0.5; %volatility
+ourAssetPath = assetPath(inp) %construct an assetPath object
+
+%% 
+% We generate some paths with the |genPaths| method:
+
+methods(ourAssetPath)
+n = 10; %number of paths to generate
+aPaths = genPaths(ourAssetPath,n) %an n by 250 matrix of numbers
+
+%%
+% Next we use the |plot| method to plot some asset paths
+
+n = 20; %number of paths to plot
+plot(ourAssetPath,n) %plot n paths
+xlabel('Time')
+ylabel('Asset Paths')
+print -depsc AssetPaths.eps
+
+%% |optPayoff| objects
+%%
+% To generate some discounted option payoffs to add some more properties
+
+inp.payoffParam.strike = 130; %initial stock price
+ourCallPayoff = optPayoff(inp) %construct an optPayoff object
+
+%% 
+% Note that the default is a European call option.  We generate some paths
+% with the |genOptPayoffs| method:
+
+methods(ourCallPayoff)
+n = 10; %number of paths to generate
+Payoffs = genOptPayoffs(ourCallPayoff,n) %an n vector of numbers
+
+%%
+% Next we use the |plot| method to plot the empirical distribution function
+% of some option payoffs
+
+n = 1e3; %number of paths to plot
+plot(ourCallPayoff,n) %plot n paths
+xlabel('Discounted Payoff')
+ylabel('Probability')
+print -depsc EuropeanCallOptionPayoffs.eps
+
+%% |optPrice| objects
+% Finally, to automate the pricing of options, we can create |optPrice|
+% objects that use |meanMC_g| to compute the option price by Monte Carlo.
+
+inp.priceParam.absTol = 0; %absolute tolerance
+inp.priceParam.relTol = 0.005; %one penny on the dollar relative tolerance
+ourCallPrice = optPrice(inp) %construct an optPrice object 
+
+%% 
+% Note that for this option, the true price is known.
+% 
+% To compute the option price by Monte Carlo we execute the command
+
+[CallPrice, out] = genOptPrice(ourCallPrice) %the option price
+
+%% 
+% Note that the price generated by Monte Carlo is within the tolerance of
+% the exact price.
+%
+% As noted elsewhere, we do not really need to know the stock price at so
+% many time steps to price a European option.  Thus, we can change the time
+% vector and price it again.
+
+ourCallPrice.timeDim.timeVector = 1
+[CallPrice,out] = genOptPrice(ourCallPrice) %the option price
+
+%% 
+% The time is now about a quarter of what it was before.
+%
+% We can also change to a put option.  First we make a new copy of our
+% |optPrice| object, and then we change the property
+% |payoffParam.putCallType|.
+
+ourPutPrice = optPrice(ourCallPrice); %make a new object with same properties as the call
+ourPutPrice.payoffParam.putCallType = {'put'}
+[PutPrice,out] = genOptPrice(ourPutPrice) %the option price
+
+
+%%
+% The time to price the put option is less than the time to price the call
+% option.  Do you know why?
+%
+% We know that the time recorded tracks the number of samples needed, which
+% in turn is related to the error tolerance as follows:
+%
+% \[\text{number of samples needed} = n = \mathcal{O}\biggl(
+% \frac{\text{var}(\text{payoff})}{\text{tolerance}^2} \biggr). 
+% \]
+% 
+% For the the call and put options this factor on the right is as follows:
+
+callRHS = var(genOptPayoffs(ourCallPrice,1e4)) ...
+   /(ourCallPrice.priceParam.relTol*CallPrice)^2
+putRHS = var(genOptPayoffs(ourPutPrice,1e4)) ...
+   /(ourPutPrice.priceParam.relTol*PutPrice)^2
+
+%%
+% We can see that the right hand side for the call is much more than for
+% the put, although not by the factor that we might expect.  This may be
+% due to some of the overhead involved |meanMC_g| using a relative error
+% criterion.  If we use a pure absolute error criterion then the relative
+% times are closer to the ratio of the right hand sides of the formula for
+% \(n\) above.
+
+ourCallPrice.priceParam.relTol=0;
+ourCallPrice.priceParam.absTol=0.1
+[CallPrice,out] = genOptPrice(ourCallPrice) %the option price
+
+ourPutPrice.priceParam.relTol=0;
+ourPutPrice.priceParam.absTol=0.1
+[PutPrice,out] = genOptPrice(ourPutPrice) %the option price
+
+callRHS = var(genOptPayoffs(ourCallPrice,1e4)) ...
+   /(ourCallPrice.priceParam.absTol)^2
+putRHS = var(genOptPayoffs(ourPutPrice,1e4)) ...
+   /(ourPutPrice.priceParam.absTol)^2
+
+%%
+% _Author: Fred J. Hickernell_
+
+
+##### SOURCE END #####
+--></body></html>

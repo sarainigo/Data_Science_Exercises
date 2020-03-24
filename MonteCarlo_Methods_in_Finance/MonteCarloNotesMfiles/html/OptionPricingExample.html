@@ -1,0 +1,356 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Monte Carlo Option Pricing</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="OptionPricingExample.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Monte Carlo Option Pricing</h1><!--introduction--><p>This MATLAB script shows how to use Monte Carlo methods to price a financial derivative or option.  An option gives the right, but not the obligation, to conduct some transaction at a future date.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Plot historical data</a></li><li><a href="#4">Estimate drift and volatility</a></li><li><a href="#6">Future price movement</a></li><li><a href="#10">European option pricing</a></li><li><a href="#14">Discussion</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> OptionPricingExample <span class="comment">%make it a function to not overwrite other variables</span>
+</pre><pre class="codeinput">gail.InitializeDisplay <span class="comment">%initialize the display parameters</span>
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeDisplay".
+Error in OptionPricingExample (line 8)
+gail.InitializeDisplay %initialize the display parameters</pre><h2>Plot historical data<a name="3"></a></h2><p>Here we load in the historical adjusted daily closing prices of a stock and plot the most recent year's data.  The data were obtained from <a href="http://finance.yahoo.com">http://finance.yahoo.com</a> for GOOG for the period ending May 19, 2015.</p><pre class="codeinput">load <span class="string">stockPriceHistory.txt</span> <span class="string">-ascii</span> <span class="comment">%load one year of stock price data into memory</span>
+S0 = stockPriceHistory(end); <span class="comment">%stock price today</span>
+Delta = 1/250; <span class="comment">%daily time increment in years</span>
+timeBefore = (-249:0) * Delta; <span class="comment">%daily monitoring for one year prior to today</span>
+plot(timeBefore, stockPriceHistory,<span class="string">'-'</span>,0,S0,<span class="string">'.'</span>) <span class="comment">%plot history</span>
+xlabel(<span class="string">'Time, \(t\), in years\hspace{5ex}'</span>) <span class="comment">%add labels</span>
+ylabel(<span class="string">'Stock Price, \(S(t)\), in dollars'</span>) <span class="comment">%to identify the axes</span>
+axis([-1 1 300 900]) <span class="comment">%set reasonable scales for axes</span>
+print <span class="string">-depsc</span> <span class="string">StockHistory.eps</span> <span class="comment">%print the plot to a .eps file</span>
+</pre><h2>Estimate drift and volatility<a name="4"></a></h2><p>Although we know the past, we do not know the future.  However, we can use historical data to build a random (stochastic) model of the future. Let \(S(t)\) denote the price of this stock at time \(t\) measured in years.  The geometric Brownian motion model of a stock price says that</p><p>\[ S(t+\Delta ) = S(t) \exp( \Delta m + \sigma \sqrt{\Delta} Z ), \]</p><p>where</p><div><ul><li>\(\Delta = 1/250\) is the <i>time increment</i> (250 trading days per year),</li><li>\(m\) is a constant <i>drift</i>,</li><li>\(\sigma\) is the constant <i>volatility</i>, and</li><li>\(Z\) is a Gaussian (normal) random variable with zero mean and unit variance.</li></ul></div><p>For the data that we have, \((t_j,S(t_j)),\ j=-249, -248, \ldots, 0\), the relationship between stock prices at successive times can be written as</p><p>\[ \log\biggl(\frac{S(t_{j+1})}{S(t_{j})} \biggr) = \log(S(t_{j+1} )) - \log(S(t_j)) = \Delta m + \sigma \sqrt{\Delta} Z_j, \]</p><p>where the \(Z_j\) are independent and identically distributed (IID) \(\mathcal{N}(0,1)\).  This means that we can estimate \(\Delta m\) and \(\sigma^2 \Delta\) by the sample mean and variance of the difference of the logged stock price data:</p><p>\[ \Delta m  = \frac{1}{249} \sum_{j=-249}^{-1} \log\biggl(\frac{S(t_{j+1})}{S(t_{j})} \biggr), \qquad  \sigma^2 \Delta = \frac{1}{248} \sum_{j=-249}^{-1} \biggl[\log\biggl(\frac{S(t_{j+1})}{S(t_{j})} \biggr) - \Delta m \biggr]^2, \qquad t_j = \frac{j}{250}. \]</p><pre class="codeinput">diffLogStockPrice = diff(log(stockPriceHistory)); <span class="comment">%difference of the log of the stock prices</span>
+scDrift = mean(diffLogStockPrice); <span class="comment">%sample mean</span>
+drift = scDrift/Delta <span class="comment">%estimated drift</span>
+scVolatility = std(diffLogStockPrice); <span class="comment">%sample standard deviation</span>
+volatility = scVolatility/sqrt(Delta) <span class="comment">%estimated volatility</span>
+</pre><p>The interesting part comes next!</p><h2>Future price movement<a name="6"></a></h2><p>Next we use these estimated quantities to plot scenarios representing what this stock might do in the future.  We set up times looking half a year, \(T\), ahead:</p><pre class="codeinput">d = 125; <span class="comment">%look at d new time steps</span>
+timeAfter = (1:d) * Delta; <span class="comment">%time steps ahead</span>
+timeFinal = timeAfter(end); <span class="comment">%final time</span>
+</pre><p>Next we program a function that computes \(n\) possible future scenarios, i.e., stock price paths, \(S(T/d), S(2T/d), \ldots, S(T)\):</p><pre class="codeinput">SVal = @(n) S0*exp(bsxfun(@plus, <span class="keyword">...</span><span class="comment"> %bsxfun is a great way to operate on one vector and one matrix</span>
+   drift*timeAfter, <span class="keyword">...</span><span class="comment"> %the time varying part</span>
+   scVolatility * cumsum(randn(n,d),2))); <span class="comment">%randn produces Gaussian random numbers</span>
+n1 = 20; <span class="comment">%small number of paths</span>
+stockVal = SVal(n1); <span class="comment">%generate some paths into the future</span>
+hold <span class="string">on</span> <span class="comment">%this prevents erasing the plot when something new is added</span>
+plot([0 timeAfter],[repmat(S0,n1,1) stockVal],<span class="string">'-'</span>, <span class="keyword">...</span>
+   [timeFinal timeFinal],[300 900],<span class="string">'k--'</span>); <span class="comment">%plot the future scenarios</span>
+text(0.47,220,<span class="string">'\(T\)'</span>) <span class="comment">%label the final time</span>
+print <span class="string">-depsc</span> <span class="string">StockHistoryPlusFewForward.eps</span> <span class="comment">%print the plot to a .eps file</span>
+</pre><p>Which one of these is correct?  In fact, there are infinitely many possibilities.  This time let's plot more and look at the histogram.</p><pre class="codeinput">n = 1e4;
+stockVal = [stockVal; SVal(n-n1)]; <span class="comment">%generate a large number of paths</span>
+h = plot([0 timeAfter],[repmat(S0,n-n1,1) stockVal(n1+1:n,:)]); <span class="comment">%plot a large number of paths</span>
+<span class="keyword">if</span> str2double(getfield(ver(<span class="string">'MATLAB'</span>), <span class="string">'Version'</span>)) &gt;= 8.4 <span class="comment">%the next part only works for later versions of MATLAB</span>
+   [binCt,binEdge] = histcounts(stockVal(:,d)); <span class="comment">%compute a histogram of the stock prices at the final time</span>
+   nBin = numel(binCt); <span class="comment">%number of bins used</span>
+   MATLABblue = [0 0.447 0.741]; <span class="comment">%the RGB coordinates of the default MATLAB blue for plotting</span>
+   h = [h; patch(timeFinal + [0; reshape([binCt; binCt],2*nBin,1); 0]*(0.4/max(binCt)), <span class="keyword">...</span><span class="comment"> %x values</span>
+      reshape([binEdge; binEdge], 2*nBin+2, 1), <span class="keyword">...</span><span class="comment"> %y values</span>
+      MATLABblue,<span class="string">'EdgeColor'</span>,MATLABblue)]; <span class="comment">%plot the histogram patch</span>
+<span class="keyword">end</span>
+print <span class="string">-depsc</span> <span class="string">StockHistoryPlusFutureScenarios.eps</span> <span class="comment">%print the plot to a .eps file</span>
+</pre><p>Note that this distribution of final stock prices is skewed towards the higher values.  The value of \(S(T)\) can be arbitrarily high, but may be no less than zero.</p><h2>European option pricing<a name="10"></a></h2><p>A European option comes in two types, call and put, and pays an amount at the time of expiry, \(T\).  The payoff depends on the final price of the stock:</p><p>\[ \begin{array}{rcc} &amp; \text{call} &amp; \text{put} \\ \hline \text{payoff} &amp; \max(S(T) - K,0) &amp; \max(K - S(T),0) \end{array} \]</p><p>Here, \(K\) denotes an agreed upon <i>strike price</i>.  The future stock price path is a random (stochastic) process, so \(S(T)\) is random, and the option payoff is random. Although we cannot know the actual future payoff, we can try to compute the fair price of the option, which is the expected value or mean of the payoff.  In fact, there is a small wrinkle. Because money today is generally worth more than money in the future, the fair price of the option is the expected value of the payoff times a discounting factor that depends on the prevailing riskless interest rate, \(r\), i.e.,</p><p>\[ \text{fair price} = \mathbb{E}(\text{payoff}\times \mathrm{e}^{-rT}). \]</p><p>One way to estimate this mean is by the sample mean of the many payoffs. Let \(Y_i\) denote the payoff of the option according to the \(i\)th random stock path.  Then the approxmate fair price is</p><p>\[ \text{approximate fair price} = \frac{1}{n}\sum_{i=1}^n Y_i \mathrm{e}^{-rT} = \begin{cases} \displaystyle \frac{1}{n}\sum_{i=1}^n \max(S_i(T) - K,0) \mathrm{e}^{-rT}, &amp; \text{call}, \\ \displaystyle \frac{1}{n}\sum_{i=1}^n \max(K - S_i(T),0) \mathrm{e}^{-rT}, &amp; \text{put}. \end{cases} \]</p><p>There is a relationship between the riskless interest rate and the drift, which is</p><p>\[m = r - \frac{\sigma^2}{2} \]</p><p>This allows us to estimate the interest rate.  Let's try to price a European call option with a strike price of \(K = \$600\).</p><pre class="codeinput">K = 600; <span class="comment">%strike price</span>
+delete(h) <span class="comment">%delete lots of paths to make the figure simple again</span>
+plot([-1 timeFinal],[K K],<span class="string">'--k'</span>) <span class="comment">%plot the strike price</span>
+text(0.53,590,<span class="string">'\(K\)'</span>) <span class="comment">%label the final time</span>
+print <span class="string">-depsc</span> <span class="string">StockHistoryPlusFuturePlusStrike.eps</span>
+</pre><p>All the paths that end up above \(K = \$600\) have a positive payoff. Some paths will yield a positive payoff and others will not.</p><pre class="codeinput">interest = drift + volatility^2/2 <span class="comment">%interest rate</span>
+Yval = max(stockVal(:,d) - K, 0) * exp(-interest * timeFinal); <span class="comment">%payoffs</span>
+euroCallPrice = mean(Yval); <span class="comment">%estimated option price</span>
+CLTCIwidth = 2.58*std(Yval)/sqrt(n); <span class="comment">%width of confidence interval</span>
+disp([<span class="string">'The option price = $'</span> num2str(euroCallPrice,<span class="string">'%6.3f'</span>) <span class="keyword">...</span>
+   <span class="string">' +/- $'</span> num2str(CLTCIwidth,<span class="string">'%6.3f'</span>)]) <span class="comment">%display output</span>
+</pre><p>We can try again, this time measuring the time taken.</p><pre class="codeinput">tic <span class="comment">%start the timer</span>
+stockVal = SVal(n); <span class="comment">%generate a large number of new paths</span>
+Yval = max(stockVal(:,d) - K, 0) * exp(-interest * timeFinal);
+euroCallPrice = mean(Yval); <span class="comment">%estimated option price</span>
+CLTCIwidth = 2.58*std(Yval)/sqrt(n); <span class="comment">%width of confidence interval</span>
+disp([<span class="string">'The option price = $'</span> num2str(euroCallPrice,<span class="string">'%6.3f'</span>) <span class="keyword">...</span>
+   <span class="string">' +/- $'</span> num2str(CLTCIwidth,<span class="string">'%6.3f'</span>)]) <span class="comment">%display output</span>
+toc <span class="comment">%output the time elapsed since the last tic</span>
+</pre><p>These two approximations to the one option price are similar, but not the same.  This is because we are using a random or Monte Carlo algrorithm</p><h2>Discussion<a name="14"></a></h2><div><ul><li>The accuracy of our approximation to the option price depends on the number of stock price paths used, \(n\).  We will discuss this dependence and how to choose \(n\) to obtain the desired accuracy in MATH 565.</li></ul></div><div><ul><li>This example looks at one of the simplest options to price.  However, note that one can consider options where they payoff is a more complicated function of the stock path, \(S(T/d), S(2T/d), \ldots, S(T))\), and the Monte Carlo method will work the same way.  We explore some of these other options in MATH 565.</li></ul></div><div><ul><li>The geometric Brownian motion model for the stock price may not capture the real world best.  Other models for the stock price path can be used, and the Monte Carlo method still works.  We explore some of these models in MATH 565.</li></ul></div><div><ul><li>There are exact formulas for prices of European put and call options with this geometric Brownian motion stock price paths. One does not really need Monte Carlo to price them, but Monte Carlo is needed for more sophisticated options.  We considered European options for the sake of simplicity.</li></ul></div><div><ul><li>We used simple IID sampling.  If one is careful, other sampling schemes may be used to obtain the desired answer in less time, i.e., with fewer samples. We explore some of these methods for improving efficiency in MATH 565.</li></ul></div><div><ul><li>Some of the procedures that we wrote from scratch have been incorporated into the Guaranteed Automatic Integration Library (GAIL) <a href="http://gailgithub.github.io/GAIL_Dev/">http://gailgithub.github.io/GAIL_Dev/</a>, which you will be using in MATH 565.</li></ul></div><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Monte Carlo Option Pricing
+% This MATLAB script shows how to use Monte Carlo methods to price a
+% financial derivative or option.  An option gives the right, but not the
+% obligation, to conduct some transaction at a future date.
+
+%%
+function OptionPricingExample %make it a function to not overwrite other variables
+gail.InitializeDisplay %initialize the display parameters
+
+%% Plot historical data
+% Here we load in the historical adjusted daily closing prices of a stock
+% and plot the most recent year's data.  The data were obtained from
+% <http://finance.yahoo.com> for GOOG for the period ending May 19, 2015.
+
+load stockPriceHistory.txt -ascii %load one year of stock price data into memory
+S0 = stockPriceHistory(end); %stock price today
+Delta = 1/250; %daily time increment in years
+timeBefore = (-249:0) * Delta; %daily monitoring for one year prior to today
+plot(timeBefore, stockPriceHistory,'-',0,S0,'.') %plot history
+xlabel('Time, \(t\), in years\hspace{5ex}') %add labels
+ylabel('Stock Price, \(S(t)\), in dollars') %to identify the axes
+axis([-1 1 300 900]) %set reasonable scales for axes
+print -depsc StockHistory.eps %print the plot to a .eps file
+
+%% Estimate drift and volatility
+% Although we know the past, we do not know the future.  However, we can
+% use historical data to build a random (stochastic) model of the future.
+% Let \(S(t)\) denote the price of this stock at time \(t\) measured in
+% years.  The geometric Brownian motion model of a stock price says that 
+% 
+% \[ S(t+\Delta ) = S(t) \exp( \Delta m + \sigma \sqrt{\Delta} Z ), \]
+%
+% where 
+% 
+% * \(\Delta = 1/250\) is the _time increment_ (250 trading days per year), 
+% * \(m\) is a constant _drift_, 
+% * \(\sigma\) is the constant _volatility_, and 
+% * \(Z\) is a Gaussian (normal) random variable with zero mean and unit
+% variance. 
+%
+% For the data that we have, \((t_j,S(t_j)),\ j=-249, -248, \ldots, 0\),
+% the relationship between stock prices at successive times can be written
+% as
+% 
+% \[ \log\biggl(\frac{S(t_{j+1})}{S(t_{j})} \biggr) = \log(S(t_{j+1} )) -
+% \log(S(t_j)) = \Delta m + \sigma \sqrt{\Delta} Z_j, \]
+%
+% where the \(Z_j\) are independent and identically distributed (IID)
+% \(\mathcal{N}(0,1)\).  This means that we can estimate \(\Delta m\) and
+% \(\sigma^2 \Delta\) by the sample mean and variance of the difference of
+% the logged stock price data:
+%
+% \[ \Delta m  = \frac{1}{249} \sum_{j=-249}^{-1}
+% \log\biggl(\frac{S(t_{j+1})}{S(t_{j})} \biggr), \qquad  \sigma^2 \Delta =
+% \frac{1}{248} \sum_{j=-249}^{-1}
+% \biggl[\log\biggl(\frac{S(t_{j+1})}{S(t_{j})} \biggr) - \Delta m
+% \biggr]^2, \qquad t_j = \frac{j}{250}. \]
+
+diffLogStockPrice = diff(log(stockPriceHistory)); %difference of the log of the stock prices
+scDrift = mean(diffLogStockPrice); %sample mean
+drift = scDrift/Delta %estimated drift
+scVolatility = std(diffLogStockPrice); %sample standard deviation
+volatility = scVolatility/sqrt(Delta) %estimated volatility
+
+%%
+% The interesting part comes next!
+
+%% Future price movement
+% Next we use these estimated quantities to plot scenarios representing
+% what this stock might do in the future.  We set up times looking half a
+% year, \(T\), ahead: 
+
+d = 125; %look at d new time steps
+timeAfter = (1:d) * Delta; %time steps ahead
+timeFinal = timeAfter(end); %final time
+
+%%
+% Next we program a function that computes \(n\) possible future scenarios,
+% i.e., stock price paths, \(S(T/d), S(2T/d), \ldots, S(T)\):
+
+SVal = @(n) S0*exp(bsxfun(@plus, ... %bsxfun is a great way to operate on one vector and one matrix
+   drift*timeAfter, ... %the time varying part
+   scVolatility * cumsum(randn(n,d),2))); %randn produces Gaussian random numbers
+n1 = 20; %small number of paths
+stockVal = SVal(n1); %generate some paths into the future
+hold on %this prevents erasing the plot when something new is added
+plot([0 timeAfter],[repmat(S0,n1,1) stockVal],'-', ...
+   [timeFinal timeFinal],[300 900],'kREPLACE_WITH_DASH_DASH'); %plot the future scenarios
+text(0.47,220,'\(T\)') %label the final time
+print -depsc StockHistoryPlusFewForward.eps %print the plot to a .eps file
+
+%%
+% Which one of these is correct?  In fact, there are infinitely many
+% possibilities.  This time let's plot more and look at the histogram.
+
+n = 1e4;
+stockVal = [stockVal; SVal(n-n1)]; %generate a large number of paths
+h = plot([0 timeAfter],[repmat(S0,n-n1,1) stockVal(n1+1:n,:)]); %plot a large number of paths
+if str2double(getfield(ver('MATLAB'), 'Version')) >= 8.4 %the next part only works for later versions of MATLAB
+   [binCt,binEdge] = histcounts(stockVal(:,d)); %compute a histogram of the stock prices at the final time
+   nBin = numel(binCt); %number of bins used
+   MATLABblue = [0 0.447 0.741]; %the RGB coordinates of the default MATLAB blue for plotting
+   h = [h; patch(timeFinal + [0; reshape([binCt; binCt],2*nBin,1); 0]*(0.4/max(binCt)), ... %x values
+      reshape([binEdge; binEdge], 2*nBin+2, 1), ... %y values
+      MATLABblue,'EdgeColor',MATLABblue)]; %plot the histogram patch
+end
+print -depsc StockHistoryPlusFutureScenarios.eps %print the plot to a .eps file
+
+%%
+% Note that this distribution of final stock prices is skewed towards the
+% higher values.  The value of \(S(T)\) can be arbitrarily high, but may be
+% no less than zero.
+
+%% European option pricing
+% A European option comes in two types, call and put, and pays an amount at
+% the time of expiry, \(T\).  The payoff depends on the final price of the
+% stock:
+%
+% \[
+% \begin{array}{rcc}
+% & \text{call} & \text{put} \\ \hline
+% \text{payoff} & \max(S(T) - K,0) & \max(K - S(T),0) 
+% \end{array}
+% \]
+%
+% Here, \(K\) denotes an agreed upon _strike price_.  The future stock
+% price path is a random (stochastic) process, so \(S(T)\) is random, and
+% the option payoff is random. Although we cannot know the actual future
+% payoff, we can try to compute the fair price of the option, which is the
+% expected value or mean of the payoff.  In fact, there is a small wrinkle.
+% Because money today is generally worth more than money in the future, the
+% fair price of the option is the expected value of the payoff times a
+% discounting factor that depends on the prevailing riskless interest rate,
+% \(r\), i.e.,
+%
+% \[ \text{fair price} = \mathbb{E}(\text{payoff}\times \mathrm{e}^{-rT}). \]
+%
+% One way to estimate this mean is by the sample mean of the many payoffs.
+% Let \(Y_i\) denote the payoff of the option according to the \(i\)th
+% random stock path.  Then the approxmate fair price is
+%
+% \[ \text{approximate fair price} = \frac{1}{n}\sum_{i=1}^n Y_i
+% \mathrm{e}^{-rT} = \begin{cases} \displaystyle \frac{1}{n}\sum_{i=1}^n
+% \max(S_i(T) - K,0) \mathrm{e}^{-rT}, & \text{call}, \\ \displaystyle
+% \frac{1}{n}\sum_{i=1}^n \max(K - S_i(T),0) \mathrm{e}^{-rT}, &
+% \text{put}. \end{cases} \]
+%
+% There is a relationship between the riskless interest rate and the drift, which is
+% 
+% \[m = r - \frac{\sigma^2}{2} \]
+%
+% This allows us to estimate the interest rate.  Let's try to price a
+% European call option with a strike price of \(K = \$600\).
+
+K = 600; %strike price
+delete(h) %delete lots of paths to make the figure simple again
+plot([-1 timeFinal],[K K],'REPLACE_WITH_DASH_DASHk') %plot the strike price
+text(0.53,590,'\(K\)') %label the final time
+print -depsc StockHistoryPlusFuturePlusStrike.eps
+
+%% 
+% All the paths that end up above \(K = \$600\) have a positive payoff.
+% Some paths will yield a positive payoff and others will not.
+
+interest = drift + volatility^2/2 %interest rate
+Yval = max(stockVal(:,d) - K, 0) * exp(-interest * timeFinal); %payoffs
+euroCallPrice = mean(Yval); %estimated option price
+CLTCIwidth = 2.58*std(Yval)/sqrt(n); %width of confidence interval
+disp(['The option price = $' num2str(euroCallPrice,'%6.3f') ...
+   ' +/- $' num2str(CLTCIwidth,'%6.3f')]) %display output
+
+%%
+% We can try again, this time measuring the time taken.
+
+tic %start the timer
+stockVal = SVal(n); %generate a large number of new paths
+Yval = max(stockVal(:,d) - K, 0) * exp(-interest * timeFinal);
+euroCallPrice = mean(Yval); %estimated option price
+CLTCIwidth = 2.58*std(Yval)/sqrt(n); %width of confidence interval
+disp(['The option price = $' num2str(euroCallPrice,'%6.3f') ...
+   ' +/- $' num2str(CLTCIwidth,'%6.3f')]) %display output
+toc %output the time elapsed since the last tic
+
+%%
+% These two approximations to the one option price are similar, but not the
+% same.  This is because we are using a random or Monte Carlo algrorithm
+
+%% Discussion
+%
+% * The accuracy of our approximation to the option price depends on the
+% number of stock price paths used, \(n\).  We will discuss this dependence
+% and how to choose \(n\) to obtain the desired accuracy in MATH 565.
+%
+% * This example looks at one of the simplest options to price.  However,
+% note that one can consider options where they payoff is a more
+% complicated function of the stock path, \(S(T/d), S(2T/d), \ldots,
+% S(T))\), and the Monte Carlo method will work the same way.  We explore
+% some of these other options in MATH 565.
+%
+% * The geometric Brownian motion model for the stock price may not capture
+% the real world best.  Other models for the stock price path can be used,
+% and the Monte Carlo method still works.  We explore some of these models
+% in MATH 565.
+%
+% * There are exact formulas for prices of European put and call options
+% with this geometric Brownian motion stock price paths. One does not
+% really need Monte Carlo to price them, but Monte Carlo is needed for more
+% sophisticated options.  We considered European options for the sake of
+% simplicity.
+%
+% * We used simple IID sampling.  If one is careful, other sampling schemes
+% may be used to obtain the desired answer in less time, i.e., with fewer
+% samples. We explore some of these methods for improving efficiency in
+% MATH 565.
+%
+% * Some of the procedures that we wrote from scratch have been
+% incorporated into the Guaranteed Automatic Integration Library (GAIL)
+% <http://gailgithub.github.io/GAIL_Dev/>, which you will be using in MATH
+% 565.
+%
+% _Author: Fred J. Hickernell_
+
+##### SOURCE END #####
+--></body></html>

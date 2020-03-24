@@ -1,0 +1,210 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Pricing Options with Control Variates</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-06"><meta name="DC.source" content="OptionPricingControlVariates.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:18px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Pricing Options with Control Variates</h1><!--introduction--><p>Knowing the exact price of an option allows us to price options with similar payoffs more efficiently.</p><p>This functionality is not yet implemented in the GAIL <tt>optPrice</tt> class, so we will solve the problem in a less elegant manner.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Initialization</a></li><li><a href="#2">The American put without control variates</a></li><li><a href="#3">The American put <b>with</b> control variates</a></li><li><a href="#5">The American put <b>with</b> two control variates</a></li></ul></div><h2>Initialization<a name="1"></a></h2><p>First we set up the basic common praramters for our examples.</p><pre class="codeinput">gail.InitializeWorkspaceDisplay <span class="comment">%initialize the workspace and the display parameters</span>
+inp.timeDim.timeVector = 1/52:1/52:1/4; <span class="comment">%weekly monitoring for three months</span>
+inp.assetParam.initPrice = 100; <span class="comment">%initial stock price</span>
+inp.assetParam.interest = 0.05; <span class="comment">%risk-free interest rate</span>
+inp.assetParam.volatility = 0.5; <span class="comment">%volatility</span>
+inp.payoffParam.strike = 120; <span class="comment">%strike price</span>
+inp.payoffParam.putCallType = {<span class="string">'put'</span>}; <span class="comment">%looking at a put option</span>
+inp.priceParam.absTol = 0.02; <span class="comment">%absolute tolerance of a two cents</span>
+inp.priceParam.relTol = 0; <span class="comment">%zero relative tolerance</span>
+EuroPut = optPrice(inp); <span class="comment">%construct an optPrice object</span>
+disp(<span class="string">'The price of the European put option'</span>)
+disp([<span class="string">'    with a geometric Brownian motion is $'</span> num2str(EuroPut.exactPrice,<span class="string">'%5.2f'</span>)])
+</pre><pre class="codeoutput error">Undefined variable "gail" or class "gail.InitializeWorkspaceDisplay".
+Error in OptionPricingControlVariates (line 11)
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters</pre><h2>The American put without control variates<a name="2"></a></h2><p>Next we create an American put <tt>optPrice</tt> object and use Monte Carlo to compute the price.</p><pre class="codeinput">AmerPut = optPrice(EuroPut); <span class="comment">%construct an American put object</span>
+AmerPut.payoffParam.optType = {<span class="string">'american'</span>};
+[AmerPutPrice,Aout] = genOptPrice(AmerPut)
+disp([<span class="string">'The price of the American put option is $'</span> <span class="keyword">...</span>
+   num2str(AmerPutPrice,<span class="string">'%5.2f'</span>)])
+disp([<span class="string">'   and this took '</span> num2str(Aout.time) <span class="string">' seconds'</span>])
+</pre><h2>The American put <b>with</b> control variates<a name="3"></a></h2><p>To use control variates we need to set up an <tt>optPayoff</tt> object with <i>two</i> or more payoffs, the one whose expectation we want to compute, and the control variate(s)</p><pre class="codeinput">AmerEuro = optPayoff(AmerPut);
+AmerEuro.payoffParam = <span class="keyword">...</span>
+   struct(<span class="string">'optType'</span>,{{<span class="string">'american'</span>,<span class="string">'euro'</span>}}, <span class="keyword">...</span><span class="comment"> %note two kinds of option payoffs</span>
+   <span class="string">'putCallType'</span>, {{<span class="string">'put'</span>,<span class="string">'put'</span>}}) <span class="comment">%this needs to have the same dimension</span>
+</pre><p>We have written a function to generate the control variate random variates from the original \(Y\) and \(\boldsymbol{X}\), in this case the American and European put option payoffs</p><pre class="language-matlab">
+<span class="keyword">function</span> YCV=YoptPrice_CV(optPayoffObj,n)
+<span class="comment">% YOPTPRICE_CV creates the control variate output for option pricing using</span>
+<span class="comment">% the |optPayoff| object</span>
+
+meanX = optPayoffObj.exactPrice(2:end); <span class="comment">%get the exact option prices for the control variates</span>
+YX = genOptPayoffs(optPayoffObj,n); <span class="comment">%get the Y and X values</span>
+beta = bsxfun(@minus,YX(:,2:end),mean(YX(:,2:end),1))\YX(:,1); <span class="comment">%optimal beta</span>
+YCV = YX(:,1) - bsxfun(@minus,YX(:,2:end),meanX)*beta; <span class="comment">%control variate random variable</span>
+
+</pre><p>In the future, this function should not be needed because <tt>optPrice</tt> or <tt>meanMC_g</tt> will contain this functionality.</p><p>Now we call <tt>meanMC_g</tt>:</p><pre class="codeinput">[AmerEuroPrice, AEout] = meanMC_g(@(n) YoptPrice_CV(AmerEuro,n), <span class="keyword">...</span>
+   inp.priceParam.absTol, inp.priceParam.relTol)
+disp([<span class="string">'The price of the American put option is $'</span> <span class="keyword">...</span>
+   num2str(AmerEuroPrice,<span class="string">'%5.2f'</span>)])
+disp([<span class="string">'   and this took '</span> num2str(AEout.time) <span class="string">' seconds,'</span>])
+disp([<span class="string">'   which is '</span> num2str(AEout.time/Aout.time) <span class="keyword">...</span>
+   <span class="string">' of the time without control variates'</span>])
+</pre><h2>The American put <b>with</b> two control variates<a name="5"></a></h2><p>To use control variates we need to set up an <tt>optPayoff</tt> object with <i>two</i> or more payoffs, the one whose expectation we want to compute, and the control variate(s)</p><pre class="codeinput">AmerEuroGeo = optPayoff(AmerPut);
+AmerEuroGeo.payoffParam = <span class="keyword">...</span>
+   struct(<span class="string">'optType'</span>,{{<span class="string">'american'</span>,<span class="string">'euro'</span>,<span class="string">'gmean'</span>}}, <span class="keyword">...</span><span class="comment"> %note two kinds of option payoffs</span>
+   <span class="string">'putCallType'</span>, {{<span class="string">'put'</span>,<span class="string">'put'</span>,<span class="string">'put'</span>}}) <span class="comment">%this needs to have the same dimension</span>
+[AmerEuroGeoPrice, AEGout] = meanMC_g(@(n) YoptPrice_CV(AmerEuroGeo,n), <span class="keyword">...</span>
+   inp.priceParam.absTol, inp.priceParam.relTol)
+disp([<span class="string">'The price of the American put option is $'</span> <span class="keyword">...</span>
+   num2str(AmerEuroGeoPrice,<span class="string">'%5.2f'</span>)])
+disp([<span class="string">'   and this took '</span> num2str(AEGout.time) <span class="string">' seconds,'</span>])
+disp([<span class="string">'   which is '</span> num2str(AEGout.time/Aout.time) <span class="keyword">...</span>
+   <span class="string">' of the time without control variates'</span>])
+</pre><p>Note that the price is similar, but the time required is much less.</p><p><i>Author: Fred J. Hickernell</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Pricing Options with Control Variates
+% Knowing the exact price of an option allows us to price options with
+% similar payoffs more efficiently.
+%
+% This functionality is not yet implemented in the GAIL |optPrice| class,
+% so we will solve the problem in a less elegant manner.
+
+%% Initialization
+% First we set up the basic common praramters for our examples.
+
+gail.InitializeWorkspaceDisplay %initialize the workspace and the display parameters
+inp.timeDim.timeVector = 1/52:1/52:1/4; %weekly monitoring for three months
+inp.assetParam.initPrice = 100; %initial stock price
+inp.assetParam.interest = 0.05; %risk-free interest rate
+inp.assetParam.volatility = 0.5; %volatility
+inp.payoffParam.strike = 120; %strike price
+inp.payoffParam.putCallType = {'put'}; %looking at a put option
+inp.priceParam.absTol = 0.02; %absolute tolerance of a two cents
+inp.priceParam.relTol = 0; %zero relative tolerance
+EuroPut = optPrice(inp); %construct an optPrice object 
+disp('The price of the European put option')
+disp(['    with a geometric Brownian motion is $' num2str(EuroPut.exactPrice,'%5.2f')])
+
+%% The American put without control variates
+% Next we create an American put |optPrice| object and use Monte Carlo to
+% compute the price.
+
+AmerPut = optPrice(EuroPut); %construct an American put object
+AmerPut.payoffParam.optType = {'american'};
+[AmerPutPrice,Aout] = genOptPrice(AmerPut)
+disp(['The price of the American put option is $' ...
+   num2str(AmerPutPrice,'%5.2f')])
+disp(['   and this took ' num2str(Aout.time) ' seconds'])
+
+%% The American put *with* control variates
+% To use control variates we need to set up an |optPayoff| object with
+% _two_ or more payoffs, the one whose expectation we want to compute, and the
+% control variate(s)
+
+AmerEuro = optPayoff(AmerPut);
+AmerEuro.payoffParam = ...
+   struct('optType',{{'american','euro'}}, ... %note two kinds of option payoffs
+   'putCallType', {{'put','put'}}) %this needs to have the same dimension
+
+%%
+% We have written a function to generate the control variate random
+% variates from the original \(Y\) and \(\boldsymbol{X}\), in this case the
+% American and European put option payoffs
+%
+% <include>YoptPrice_CV.m</include>
+%
+% In the future, this function should not be needed because |optPrice| or
+% |meanMC_g| will contain this functionality.
+%
+% Now we call |meanMC_g|:
+
+[AmerEuroPrice, AEout] = meanMC_g(@(n) YoptPrice_CV(AmerEuro,n), ...
+   inp.priceParam.absTol, inp.priceParam.relTol)
+disp(['The price of the American put option is $' ...
+   num2str(AmerEuroPrice,'%5.2f')])
+disp(['   and this took ' num2str(AEout.time) ' seconds,'])
+disp(['   which is ' num2str(AEout.time/Aout.time) ...
+   ' of the time without control variates'])
+
+%% The American put *with* two control variates
+% To use control variates we need to set up an |optPayoff| object with
+% _two_ or more payoffs, the one whose expectation we want to compute, and the
+% control variate(s)
+
+AmerEuroGeo = optPayoff(AmerPut);
+AmerEuroGeo.payoffParam = ...
+   struct('optType',{{'american','euro','gmean'}}, ... %note two kinds of option payoffs
+   'putCallType', {{'put','put','put'}}) %this needs to have the same dimension
+[AmerEuroGeoPrice, AEGout] = meanMC_g(@(n) YoptPrice_CV(AmerEuroGeo,n), ...
+   inp.priceParam.absTol, inp.priceParam.relTol)
+disp(['The price of the American put option is $' ...
+   num2str(AmerEuroGeoPrice,'%5.2f')])
+disp(['   and this took ' num2str(AEGout.time) ' seconds,'])
+disp(['   which is ' num2str(AEGout.time/Aout.time) ...
+   ' of the time without control variates'])
+
+%% 
+% Note that the price is similar, but the time required is much less.
+%
+% _Author: Fred J. Hickernell_
+
+##### SOURCE END #####
+--></body></html>
