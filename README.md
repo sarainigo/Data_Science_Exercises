@@ -1,4 +1,4 @@
-# Data_Science_Exercises
+# Data Science Exercises
 Repository where I upload interesting exercises carried out in the Master of Data Science at the Illinois Institute of Technology (IIT).
 
 These exercises are part of courses such as:
